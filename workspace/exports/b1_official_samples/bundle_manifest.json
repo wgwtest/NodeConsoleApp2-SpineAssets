@@ -2,10 +2,10 @@
   "schemaVersion": "spine_bundle_manifest_v1",
   "bundleId": "b1_official_samples",
   "bundleVersion": "0.1.0",
-  "generatedAt": "2026-04-07T12:28:40.523Z",
+  "generatedAt": "2026-04-07T12:30:31.152Z",
   "sourceCatalog": {
     "schemaVersion": "presentation_catalog_v1",
-    "generatedAt": "2026-04-07T12:28:40.523Z"
+    "generatedAt": "2026-04-07T12:30:31.152Z"
   },
   "characters": [
     {
