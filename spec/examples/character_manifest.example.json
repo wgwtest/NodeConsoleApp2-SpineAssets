@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "spine_character_manifest_v1",
+  "presentationId": "goblin_story_headhunter",
+  "skeletonFile": "goblin_story_headhunter.skel",
+  "atlasFile": "goblin_story_headhunter.atlas",
+  "texturePages": [
+    "goblin_story_headhunter.png"
+  ],
+  "defaultSkin": "base",
+  "animations": [
+    "idle",
+    "attack_light",
+    "hit_front",
+    "death"
+  ],
+  "slots": [
+    "weapon",
+    "shield",
+    "fx_front"
+  ],
+  "anchorProfile": {
+    "x": 0.5,
+    "y": 1.0
+  },
+  "scaleProfile": {
+    "baseScale": 1.0
+  }
+}

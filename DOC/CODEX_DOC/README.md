@@ -19,3 +19,7 @@
 3. [02_设计说明/README](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/README.md)
 4. [03_研制计划/README](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/README.md)
 5. [05_测试文档/README](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/05_测试文档/README.md)
+
+当前活跃节点：
+
+1. `A2 双仓库协作规则与交付接口（已自测，待人工验收）`

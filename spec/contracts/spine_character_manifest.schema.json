@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spine_character_manifest.schema.json",
+  "title": "Spine Character Manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "presentationId",
+    "skeletonFile",
+    "atlasFile",
+    "texturePages",
+    "defaultSkin",
+    "animations",
+    "slots",
+    "anchorProfile",
+    "scaleProfile"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "presentationId": { "type": "string" },
+    "skeletonFile": { "type": "string" },
+    "atlasFile": { "type": "string" },
+    "texturePages": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "defaultSkin": { "type": ["string", "null"] },
+    "animations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "slots": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "anchorProfile": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "scaleProfile": {
+      "type": "object",
+      "required": ["baseScale"],
+      "properties": {
+        "baseScale": { "type": "number" }
+      }
+    }
+  }
+}

@@ -23,7 +23,7 @@
 
 当前活跃节点：
 
-1. `A1 项目底座与契约建立`
+1. `A2 双仓库协作规则与交付接口`
 
 ## 快速开始
 
@@ -55,7 +55,8 @@ workspace/imports/game_catalog.json
 1. [工程策略映射](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/00-本地工程策略映射.md)
 2. [工程总体分析](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/01_需求分析/00-工程总体分析.md)
 3. [总体设计](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/01-独立素材工程总体设计(spine_assets_architecture)-设计说明.md)
-4. [A1 研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/02-WBS-A1-项目底座与契约建立-研制计划.md)
+4. [双仓库协作规则](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/03-双仓库协作模式与接口变更规则(cross_repo_collaboration)-设计说明.md)
+5. [A2 研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/04-WBS-L2-A2-双仓库协作规则与交付接口-研制计划.md)
 5. [首轮自测报告](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/05_测试文档/01_自测报告/2026-04-07-125145-A1-项目底座与契约建立-自测报告.md)
 
 ## 目录

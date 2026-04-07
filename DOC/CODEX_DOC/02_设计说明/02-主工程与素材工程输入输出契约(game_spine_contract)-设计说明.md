@@ -31,12 +31,31 @@
 未来正式输出：
 
 1. `workspace/exports/<bundle>/bundle_manifest.json`
-2. `workspace/exports/<bundle>/<character>.skel|json`
-3. `workspace/exports/<bundle>/<character>.atlas`
-4. `workspace/exports/<bundle>/*.png`
+2. `workspace/exports/<bundle>/characters/<presentationId>/character_manifest.json`
+3. `workspace/exports/<bundle>/characters/<presentationId>/<presentationId>.skel|json`
+4. `workspace/exports/<bundle>/characters/<presentationId>/<presentationId>.atlas`
+5. `workspace/exports/<bundle>/characters/<presentationId>/*.png`
 
 ## 4. 边界规则
 
 1. 主工程不读取 `Spine` 源工程文件
 2. 素材工程不写回主工程玩法数据
 3. 两个工程之间通过导入目录和导出目录解耦
+
+## 5. 版本规则
+
+1. `presentation_catalog`、`bundle_manifest`、`character_manifest` 必须带 `schemaVersion`
+2. 向前兼容的新增字段，只增加次版本号
+3. 字段语义改变、必填项调整、目录结构调整，视为 breaking change，必须升主版本号
+4. 发生 breaking change 时，必须在 `NodeConsoleApp2` 与 `NodeConsoleApp2-SpineAssets` 同轮建立 issue 并更新镜像文档
+
+## 6. 样例与 schema 入口
+
+1. schema：
+   - `spec/contracts/presentation_catalog.schema.json`
+   - `spec/contracts/spine_bundle_manifest.schema.json`
+   - `spec/contracts/spine_character_manifest.schema.json`
+2. 样例：
+   - `spec/examples/presentation_catalog.example.json`
+   - `spec/examples/bundle_manifest.example.json`
+   - `spec/examples/character_manifest.example.json`

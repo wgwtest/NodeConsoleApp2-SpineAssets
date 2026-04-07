@@ -3,24 +3,35 @@
   "$id": "spine_bundle_manifest.schema.json",
   "title": "Spine Bundle Manifest",
   "type": "object",
-  "required": ["bundleId", "version", "characters"],
+  "required": [
+    "schemaVersion",
+    "bundleId",
+    "bundleVersion",
+    "generatedAt",
+    "sourceCatalog",
+    "characters"
+  ],
   "properties": {
+    "schemaVersion": { "type": "string" },
     "bundleId": { "type": "string" },
-    "version": { "type": "string" },
+    "bundleVersion": { "type": "string" },
+    "generatedAt": { "type": "string" },
+    "sourceCatalog": {
+      "type": "object",
+      "required": ["schemaVersion", "generatedAt"],
+      "properties": {
+        "schemaVersion": { "type": "string" },
+        "generatedAt": { "type": "string" }
+      }
+    },
     "characters": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["characterId", "skeletonFile", "atlasFile", "defaultSkin", "animations"],
+        "required": ["presentationId", "characterManifest"],
         "properties": {
-          "characterId": { "type": "string" },
-          "skeletonFile": { "type": "string" },
-          "atlasFile": { "type": "string" },
-          "defaultSkin": { "type": ["string", "null"] },
-          "animations": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
+          "presentationId": { "type": "string" },
+          "characterManifest": { "type": "string" }
         }
       }
     }

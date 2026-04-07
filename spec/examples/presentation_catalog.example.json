@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "schemaVersion": "presentation_catalog_v1",
+    "generatedAt": "2026-04-07T05:00:00.000Z",
+    "source": {
+      "gameRepoRoot": "/home/wgw/CodexProject/NodeConsoleApp2/NodeConsoleApp2",
+      "configFile": "/home/wgw/CodexProject/NodeConsoleApp2/NodeConsoleApp2/assets/data/config.json",
+      "playerFile": "/home/wgw/CodexProject/NodeConsoleApp2/NodeConsoleApp2/assets/data/player.json",
+      "enemiesFile": "/home/wgw/CodexProject/NodeConsoleApp2/NodeConsoleApp2/assets/data/enemies.json"
+    }
+  },
+  "players": [
+    {
+      "id": "char_player_001",
+      "name": "Player1",
+      "presentationId": "char_player_001",
+      "sourceType": "player",
+      "stats": {
+        "hp": 100,
+        "maxHp": 100,
+        "ap": 4,
+        "maxAp": 6,
+        "speed": 1
+      },
+      "bodyParts": {},
+      "equipmentSlots": ["weapon", "head", "chest"],
+      "visual": {
+        "defaultSkin": null,
+        "spineSkeletonId": null,
+        "notes": []
+      }
+    }
+  ],
+  "enemies": [
+    {
+      "id": "goblin_story_headhunter",
+      "name": "哥布林追猎手",
+      "presentationId": "goblin_story_headhunter",
+      "race": "goblin",
+      "class": "hunter",
+      "sourceType": "enemy",
+      "stats": {
+        "hp": 65,
+        "maxHp": 65,
+        "ap": 4,
+        "speed": 11
+      },
+      "bodyParts": {},
+      "skillIds": ["skill_bite", "skill_throw_stone"],
+      "visual": {
+        "defaultSkin": null,
+        "spineSkeletonId": null,
+        "notes": []
+      }
+    }
+  ]
+}

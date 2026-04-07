@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "spine_bundle_manifest_v1",
+  "bundleId": "story_chapter_01_v1",
+  "bundleVersion": "1.0.0",
+  "generatedAt": "2026-04-07T05:10:00.000Z",
+  "sourceCatalog": {
+    "schemaVersion": "presentation_catalog_v1",
+    "generatedAt": "2026-04-07T05:00:00.000Z"
+  },
+  "characters": [
+    {
+      "presentationId": "char_player_001",
+      "characterManifest": "characters/char_player_001/character_manifest.json"
+    },
+    {
+      "presentationId": "goblin_story_headhunter",
+      "characterManifest": "characters/goblin_story_headhunter/character_manifest.json"
+    }
+  ]
+}
