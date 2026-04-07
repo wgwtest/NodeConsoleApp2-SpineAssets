@@ -5,6 +5,11 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "sync:catalog": "node tools/sync_game_catalog.mjs --config config/source-project.json"
+    "sync:catalog": "node tools/sync_game_catalog.mjs --config config/source-project.json",
+    "samples:fetch": "node tools/fetch_official_samples.mjs",
+    "samples:build": "node tools/build_sample_bundle.mjs",
+    "samples:validate": "node tools/validate_sample_bundle.mjs",
+    "samples:preview": "node tools/build_sample_preview.mjs",
+    "samples:b1": "npm run samples:fetch && npm run samples:build && npm run samples:validate && npm run samples:preview"
   }
 }

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "spine_bundle_manifest_v1",
+  "bundleId": "b1_official_samples",
+  "bundleVersion": "0.1.0",
+  "generatedAt": "2026-04-07T12:28:40.523Z",
+  "sourceCatalog": {
+    "schemaVersion": "presentation_catalog_v1",
+    "generatedAt": "2026-04-07T12:28:40.523Z"
+  },
+  "characters": [
+    {
+      "presentationId": "spineboy",
+      "characterManifest": "characters/spineboy/character_manifest.json"
+    },
+    {
+      "presentationId": "raptor",
+      "characterManifest": "characters/raptor/character_manifest.json"
+    }
+  ]
+}

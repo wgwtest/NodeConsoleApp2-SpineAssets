@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "spine_character_manifest_v1",
+  "presentationId": "raptor",
+  "skeletonFile": "raptor.json",
+  "atlasFile": "raptor.atlas",
+  "texturePages": [
+    "raptor.png"
+  ],
+  "defaultSkin": "default",
+  "animations": [
+    "gun-grab",
+    "gun-holster",
+    "jump",
+    "roar",
+    "walk"
+  ],
+  "slots": [
+    "back-hand",
+    "back-arm",
+    "back-bracer",
+    "back-knee",
+    "raptor-jaw-inside",
+    "raptor-mouth-inside",
+    "raptow-jaw-tooth",
+    "raptor-horn-back",
+    "raptor-tongue",
+    "raptor-hindleg-back",
+    "raptor-back-arm",
+    "back-thigh",
+    "raptor-body",
+    "raptor-saddle-strap-front",
+    "raptor-saddle-strap-back",
+    "raptor-saddle",
+    "raptor-jaw",
+    "raptor-front-arm",
+    "raptor-front-leg",
+    "neck",
+    "spineboy-torso",
+    "head",
+    "eyes-open",
+    "mouth-smile",
+    "visor",
+    "raptor-horn",
+    "front-thigh",
+    "stirrup-back",
+    "lower-leg",
+    "stirrup-strap",
+    "stirrup-front",
+    "gun",
+    "front-arm",
+    "front-bracer",
+    "front-hand",
+    "tail-shadow"
+  ],
+  "anchorProfile": {
+    "x": 0.5,
+    "y": 1
+  },
+  "scaleProfile": {
+    "baseScale": 1
+  }
+}

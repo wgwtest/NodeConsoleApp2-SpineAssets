@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B1 Official Sample Bundle Preview</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #162032;
+        --muted: #586271;
+        --surface: #f7f5f0;
+        --card: #ffffff;
+        --line: #d6d0c6;
+        --accent: #b5532f;
+        --accent-soft: #f7e3d7;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, #fff2d9 0, transparent 30%),
+          linear-gradient(180deg, #f4efe7 0%, #f0eee9 100%);
+      }
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+      }
+      .hero {
+        margin-bottom: 28px;
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-size: 36px;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        box-shadow: 0 18px 40px rgba(22, 32, 50, 0.08);
+      }
+      .card header {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .status {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+      }
+      img {
+        width: 100%;
+        margin: 16px 0;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #faf8f2;
+      }
+      dl {
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+      dt {
+        font-weight: 700;
+      }
+      dd {
+        margin: 4px 0 0;
+        color: var(--muted);
+      }
+      .runtime-placeholder {
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: 16px;
+        background: #faf3ee;
+      }
+      code {
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        font-size: 0.95em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>b1_official_samples</h1>
+        <p>characters=2 validated=true bundleVersion=0.1.0</p>
+      </section>
+      <section class="grid">
+        
+      <article class="card">
+        <header>
+          <div>
+            <div class="eyebrow">player</div>
+            <h2>spineboy</h2>
+          </div>
+          <span class="status">validated</span>
+        </header>
+        <img src="./assets/spineboy.png" alt="spineboy texture preview" />
+        <dl>
+          <div><dt>Skeleton</dt><dd>spineboy.json</dd></div>
+          <div><dt>Atlas</dt><dd>spineboy.atlas</dd></div>
+          <div><dt>Default Skin</dt><dd>default</dd></div>
+          <div><dt>Animations</dt><dd>aim, death, hoverboard, idle, idle-turn, jump, portal, run, run-to-idle, shoot, walk</dd></div>
+          <div><dt>Slots</dt><dd>portal-bg, portal-shade, portal-streaks2, portal-streaks1, portal-flare8, portal-flare9, portal-flare10, clipping, exhaust3, hoverboard-thruster-rear, hoverboard-thruster-front, hoverboard-board, side-glow1, side-glow3, side-glow2, hoverglow-front, hoverglow-rear, exhaust1, exhaust2, rear-upper-arm, rear-bracer, gun, rear-foot, rear-thigh, rear-shin, neck, torso, front-upper-arm, head, eye, front-thigh, front-foot, front-shin, mouth, goggles, front-bracer, front-fist, muzzle, head-bb, portal-flare1, portal-flare2, portal-flare3, portal-flare4, portal-flare5, portal-flare6, portal-flare7, crosshair, muzzle-glow, muzzle-ring, muzzle-ring2, muzzle-ring3, muzzle-ring4</dd></div>
+        </dl>
+        <section class="runtime-placeholder">
+          <h3>Runtime Placeholder</h3>
+          <p>本区为后续浏览器内 Spine runtime 播放预留，B1 阶段仅验证静态 bundle 证据。</p>
+        </section>
+      </article>
+    
+
+      <article class="card">
+        <header>
+          <div>
+            <div class="eyebrow">enemy</div>
+            <h2>raptor</h2>
+          </div>
+          <span class="status">validated</span>
+        </header>
+        <img src="./assets/raptor.png" alt="raptor texture preview" />
+        <dl>
+          <div><dt>Skeleton</dt><dd>raptor.json</dd></div>
+          <div><dt>Atlas</dt><dd>raptor.atlas</dd></div>
+          <div><dt>Default Skin</dt><dd>default</dd></div>
+          <div><dt>Animations</dt><dd>gun-grab, gun-holster, jump, roar, walk</dd></div>
+          <div><dt>Slots</dt><dd>back-hand, back-arm, back-bracer, back-knee, raptor-jaw-inside, raptor-mouth-inside, raptow-jaw-tooth, raptor-horn-back, raptor-tongue, raptor-hindleg-back, raptor-back-arm, back-thigh, raptor-body, raptor-saddle-strap-front, raptor-saddle-strap-back, raptor-saddle, raptor-jaw, raptor-front-arm, raptor-front-leg, neck, spineboy-torso, head, eyes-open, mouth-smile, visor, raptor-horn, front-thigh, stirrup-back, lower-leg, stirrup-strap, stirrup-front, gun, front-arm, front-bracer, front-hand, tail-shadow</dd></div>
+        </dl>
+        <section class="runtime-placeholder">
+          <h3>Runtime Placeholder</h3>
+          <p>本区为后续浏览器内 Spine runtime 播放预留，B1 阶段仅验证静态 bundle 证据。</p>
+        </section>
+      </article>
+    
+      </section>
+    </main>
+  </body>
+</html>

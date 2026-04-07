@@ -4,6 +4,10 @@ workspace/exports/*
 workspace/preview/*
 workspace/spine_projects/*
 !workspace/exports/.gitkeep
+!workspace/exports/b1_official_samples/
+!workspace/exports/b1_official_samples/**
 !workspace/preview/.gitkeep
+!workspace/preview/b1_official_samples/
+!workspace/preview/b1_official_samples/**
 !workspace/spine_projects/.gitkeep
 config/source-project.json
