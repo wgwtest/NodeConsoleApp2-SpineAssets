@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "presentation_catalog.schema.json",
+  "title": "Presentation Catalog",
+  "type": "object",
+  "required": ["meta", "players", "enemies"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["schemaVersion", "generatedAt", "source"]
+    },
+    "players": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/presentationEntity"
+      }
+    },
+    "enemies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/presentationEntity"
+      }
+    }
+  },
+  "$defs": {
+    "presentationEntity": {
+      "type": "object",
+      "required": ["id", "name", "presentationId", "bodyParts", "visual"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "presentationId": { "type": "string" },
+        "bodyParts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["current", "max", "weakness"]
+          }
+        },
+        "visual": {
+          "type": "object",
+          "required": ["defaultSkin", "spineSkeletonId", "notes"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "nodeconsoleapp2-spine-assets",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "sync:catalog": "node tools/sync_game_catalog.mjs --config config/source-project.json"
+  }
+}

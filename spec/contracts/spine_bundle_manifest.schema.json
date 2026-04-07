@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spine_bundle_manifest.schema.json",
+  "title": "Spine Bundle Manifest",
+  "type": "object",
+  "required": ["bundleId", "version", "characters"],
+  "properties": {
+    "bundleId": { "type": "string" },
+    "version": { "type": "string" },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["characterId", "skeletonFile", "atlasFile", "defaultSkin", "animations"],
+        "properties": {
+          "characterId": { "type": "string" },
+          "skeletonFile": { "type": "string" },
+          "atlasFile": { "type": "string" },
+          "defaultSkin": { "type": ["string", "null"] },
+          "animations": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

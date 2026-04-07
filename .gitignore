@@ -1,0 +1,9 @@
+node_modules/
+workspace/imports/*.json
+workspace/exports/*
+workspace/preview/*
+workspace/spine_projects/*
+!workspace/exports/.gitkeep
+!workspace/preview/.gitkeep
+!workspace/spine_projects/.gitkeep
+config/source-project.json
