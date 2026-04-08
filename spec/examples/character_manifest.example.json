@@ -1,12 +1,11 @@
 {
-  "schemaVersion": "spine_character_manifest_v1",
+  "schemaVersion": "spine_character_manifest_v2",
   "presentationId": "goblin_story_headhunter",
   "skeletonFile": "goblin_story_headhunter.skel",
   "atlasFile": "goblin_story_headhunter.atlas",
   "texturePages": [
     "goblin_story_headhunter.png"
   ],
-  "defaultSkin": "base",
   "animations": [
     "idle",
     "attack_light",
@@ -24,5 +23,36 @@
   },
   "scaleProfile": {
     "baseScale": 1.0
-  }
+  },
+  "defaultVariantId": "default",
+  "variants": [
+    {
+      "variantId": "default",
+      "label": "Default",
+      "skin": "base",
+      "enabled": true,
+      "allowedAnimations": [
+        "idle",
+        "attack_light",
+        "hit_front",
+        "death"
+      ],
+      "anchorProfileOverride": null,
+      "scaleProfileOverride": null,
+      "resourceOverrides": {}
+    },
+    {
+      "variantId": "festival",
+      "label": "Festival Paint",
+      "skin": "festival",
+      "enabled": true,
+      "allowedAnimations": [
+        "idle",
+        "attack_light"
+      ],
+      "anchorProfileOverride": null,
+      "scaleProfileOverride": null,
+      "resourceOverrides": {}
+    }
+  ]
 }

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "spine_package_manifest_v1",
+  "presentationId": "hero_knight",
+  "characterRequestId": "req_hero_knight_v001",
+  "bundleTarget": "main_cast",
+  "sourceRequestDir": "source",
+  "requestSnapshotFile": "source/request_snapshot.json",
+  "defaultVariantId": "default",
+  "variantIds": [
+    "default",
+    "winter"
+  ],
+  "exportableVariantIds": [
+    "default",
+    "winter"
+  ],
+  "componentsDir": "components",
+  "spineDir": "spine",
+  "skeletonFile": "hero_knight.json",
+  "atlasFile": "hero_knight.atlas",
+  "texturePages": [
+    "hero_knight.png"
+  ],
+  "anchorProfile": {
+    "x": 0.5,
+    "y": 1.0
+  },
+  "scaleProfile": {
+    "baseScale": 1.0
+  }
+}

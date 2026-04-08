@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "spine_variant_manifest_v1",
+  "presentationId": "hero_knight",
+  "variantId": "winter",
+  "label": "Winter Cloak",
+  "skin": "winter",
+  "enabled": true,
+  "allowedAnimations": [
+    "idle",
+    "attack"
+  ],
+  "requiredComponents": [
+    "weapon_sword"
+  ],
+  "anchorProfileOverride": null,
+  "scaleProfileOverride": null,
+  "resourceOverrides": {}
+}

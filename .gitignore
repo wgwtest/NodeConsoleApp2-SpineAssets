@@ -1,5 +1,7 @@
 node_modules/
 workspace/imports/*.json
+workspace/packages/*
+!workspace/packages/.gitkeep
 workspace/exports/*
 workspace/preview/*
 workspace/spine_projects/*

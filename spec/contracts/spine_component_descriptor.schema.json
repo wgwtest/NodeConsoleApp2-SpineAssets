@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spine_component_descriptor.schema.json",
+  "title": "Spine Component Descriptor",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "presentationId",
+    "componentId",
+    "slotName",
+    "status",
+    "sourceFiles",
+    "artifactFiles"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "spine_component_descriptor_v1"
+    },
+    "presentationId": { "type": "string" },
+    "componentId": { "type": "string" },
+    "slotName": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["pending_blackbox", "ready", "rejected"]
+    },
+    "sourceFiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "artifactFiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

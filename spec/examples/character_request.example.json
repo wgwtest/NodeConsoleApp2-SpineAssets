@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "character_request_v1",
+  "characterRequestId": "req_hero_knight_v001",
+  "presentationId": "hero_knight",
+  "title": "Hero Knight",
+  "description": "Frontline swordsman with a winter skin variant.",
+  "bundleTarget": "main_cast",
+  "variants": [
+    {
+      "variantId": "default",
+      "label": "Default",
+      "skin": "default"
+    },
+    {
+      "variantId": "winter",
+      "label": "Winter Cloak",
+      "skin": "winter"
+    }
+  ],
+  "requiredActions": [
+    "idle",
+    "attack"
+  ],
+  "requiredSlots": [
+    "weapon",
+    "head"
+  ]
+}

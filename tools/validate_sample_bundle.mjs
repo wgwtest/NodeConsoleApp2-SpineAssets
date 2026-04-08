@@ -58,6 +58,35 @@ function validateCharacterManifestShape(manifest) {
   assertRequiredArray(manifest.slots, 'character_manifest.slots');
   assertObject(manifest.anchorProfile, 'character_manifest.anchorProfile');
   assertObject(manifest.scaleProfile, 'character_manifest.scaleProfile');
+  assertRequiredString(
+    manifest.defaultVariantId,
+    'character_manifest.defaultVariantId'
+  );
+  assertRequiredArray(manifest.variants, 'character_manifest.variants');
+  if (manifest.variants.length === 0) {
+    throw new Error('character_manifest.variants 不能为空');
+  }
+
+  let hasDefaultVariant = false;
+  for (const [index, variant] of manifest.variants.entries()) {
+    assertObject(variant, `character_manifest.variants[${index}]`);
+    for (const key of ['variantId', 'label', 'skin']) {
+      assertRequiredString(variant[key], `character_manifest.variants[${index}].${key}`);
+    }
+    assertRequiredArray(
+      variant.allowedAnimations,
+      `character_manifest.variants[${index}].allowedAnimations`
+    );
+    if (variant.variantId === manifest.defaultVariantId) {
+      hasDefaultVariant = true;
+    }
+  }
+
+  if (!hasDefaultVariant) {
+    throw new Error(
+      `character_manifest.defaultVariantId 未出现在 variants 中: ${manifest.defaultVariantId}`
+    );
+  }
 }
 
 export async function validateSampleBundle({ bundleRoot }) {

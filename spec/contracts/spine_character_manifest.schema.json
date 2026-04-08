@@ -9,14 +9,18 @@
     "skeletonFile",
     "atlasFile",
     "texturePages",
-    "defaultSkin",
     "animations",
     "slots",
     "anchorProfile",
-    "scaleProfile"
+    "scaleProfile",
+    "defaultVariantId",
+    "variants"
   ],
   "properties": {
-    "schemaVersion": { "type": "string" },
+    "schemaVersion": {
+      "type": "string",
+      "const": "spine_character_manifest_v2"
+    },
     "presentationId": { "type": "string" },
     "skeletonFile": { "type": "string" },
     "atlasFile": { "type": "string" },
@@ -24,7 +28,6 @@
       "type": "array",
       "items": { "type": "string" }
     },
-    "defaultSkin": { "type": ["string", "null"] },
     "animations": {
       "type": "array",
       "items": { "type": "string" }
@@ -46,6 +49,46 @@
       "required": ["baseScale"],
       "properties": {
         "baseScale": { "type": "number" }
+      }
+    },
+    "defaultVariantId": { "type": "string" },
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/variant"
+      }
+    }
+  },
+  "$defs": {
+    "variant": {
+      "type": "object",
+      "required": [
+        "variantId",
+        "label",
+        "skin",
+        "enabled",
+        "allowedAnimations",
+        "resourceOverrides"
+      ],
+      "properties": {
+        "variantId": { "type": "string" },
+        "label": { "type": "string" },
+        "skin": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "allowedAnimations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "anchorProfileOverride": {
+          "type": ["object", "null"]
+        },
+        "scaleProfileOverride": {
+          "type": ["object", "null"]
+        },
+        "resourceOverrides": {
+          "type": "object"
+        }
       }
     }
   }

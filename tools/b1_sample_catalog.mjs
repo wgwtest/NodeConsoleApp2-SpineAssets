@@ -9,7 +9,7 @@ export const B1_BUNDLE_ID = 'b1_official_samples';
 export const B1_BUNDLE_VERSION = '0.1.0';
 export const PRESENTATION_CATALOG_SCHEMA_VERSION = 'presentation_catalog_v1';
 export const SPINE_BUNDLE_MANIFEST_SCHEMA_VERSION = 'spine_bundle_manifest_v1';
-export const SPINE_CHARACTER_MANIFEST_SCHEMA_VERSION = 'spine_character_manifest_v1';
+export const SPINE_CHARACTER_MANIFEST_SCHEMA_VERSION = 'spine_character_manifest_v2';
 
 export const OFFICIAL_SAMPLE_CATALOG = [
   {

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spine_package_manifest.schema.json",
+  "title": "Spine Package Manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "presentationId",
+    "characterRequestId",
+    "bundleTarget",
+    "sourceRequestDir",
+    "requestSnapshotFile",
+    "defaultVariantId",
+    "variantIds",
+    "exportableVariantIds",
+    "componentsDir",
+    "spineDir",
+    "skeletonFile",
+    "atlasFile",
+    "texturePages",
+    "anchorProfile",
+    "scaleProfile"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "spine_package_manifest_v1"
+    },
+    "presentationId": { "type": "string" },
+    "characterRequestId": { "type": "string" },
+    "bundleTarget": { "type": "string" },
+    "sourceRequestDir": { "type": "string" },
+    "requestSnapshotFile": { "type": "string" },
+    "defaultVariantId": { "type": "string" },
+    "variantIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "exportableVariantIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "componentsDir": { "type": "string" },
+    "spineDir": { "type": "string" },
+    "skeletonFile": { "type": "string" },
+    "atlasFile": { "type": "string" },
+    "texturePages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "anchorProfile": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "scaleProfile": {
+      "type": "object",
+      "required": ["baseScale"],
+      "properties": {
+        "baseScale": { "type": "number" }
+      }
+    }
+  }
+}

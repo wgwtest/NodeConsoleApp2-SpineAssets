@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "spine_variant_manifest.schema.json",
+  "title": "Spine Variant Manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "presentationId",
+    "variantId",
+    "label",
+    "skin",
+    "enabled",
+    "allowedAnimations",
+    "requiredComponents"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "spine_variant_manifest_v1"
+    },
+    "presentationId": { "type": "string" },
+    "variantId": { "type": "string" },
+    "label": { "type": "string" },
+    "skin": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "allowedAnimations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "requiredComponents": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "anchorProfileOverride": {
+      "type": ["object", "null"]
+    },
+    "scaleProfileOverride": {
+      "type": ["object", "null"]
+    },
+    "resourceOverrides": {
+      "type": "object"
+    }
+  }
+}

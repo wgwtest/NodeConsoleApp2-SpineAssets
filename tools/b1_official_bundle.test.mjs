@@ -210,7 +210,11 @@ test('buildSampleBundle 生成两个样本角色的 bundle_manifest 与 characte
 
   assert.equal(result.bundle.bundleId, B1_BUNDLE_ID);
   assert.equal(result.bundle.characters.length, 2);
-  assert.equal(result.characters[0].manifest.schemaVersion, 'spine_character_manifest_v1');
+  assert.equal(result.characters[0].manifest.schemaVersion, 'spine_character_manifest_v2');
+  assert.equal(result.characters[0].manifest.defaultVariantId, 'default');
+  assert.equal(result.characters[0].manifest.variants.length, 1);
+  assert.equal(result.characters[0].manifest.variants[0].variantId, 'default');
+  assert.equal(result.characters[0].manifest.variants[0].skin, 'default');
   assert.deepEqual(result.characters[0].manifest.texturePages, ['spineboy.png']);
   assert.deepEqual(result.characters[1].manifest.texturePages, ['raptor.png']);
 

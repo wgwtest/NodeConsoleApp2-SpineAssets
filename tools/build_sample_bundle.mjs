@@ -109,17 +109,32 @@ export async function buildSampleBundle({
       await copyAsset(licenseSource, licenseTarget);
     }
 
+    const defaultSkin = extractDefaultSkin(spineJson) ?? 'default';
+    const animations = extractAnimations(spineJson);
+
     const manifest = {
       schemaVersion: SPINE_CHARACTER_MANIFEST_SCHEMA_VERSION,
       presentationId: sample.presentationId,
       skeletonFile: sample.assets.skeleton.outputName,
       atlasFile: sample.assets.atlas.outputName,
       texturePages: sample.assets.textures.map(texture => texture.outputName),
-      defaultSkin: extractDefaultSkin(spineJson),
-      animations: extractAnimations(spineJson),
+      animations,
       slots: extractSlots(spineJson),
       anchorProfile: sample.anchorProfile,
-      scaleProfile: sample.scaleProfile
+      scaleProfile: sample.scaleProfile,
+      defaultVariantId: 'default',
+      variants: [
+        {
+          variantId: 'default',
+          label: 'Default',
+          skin: defaultSkin,
+          enabled: true,
+          allowedAnimations: animations,
+          anchorProfileOverride: null,
+          scaleProfileOverride: null,
+          resourceOverrides: {}
+        }
+      ]
     };
 
     await fs.writeFile(

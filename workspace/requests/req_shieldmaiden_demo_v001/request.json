@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "character_request_v1",
+  "characterRequestId": "req_shieldmaiden_demo_v001",
+  "presentationId": "shieldmaiden_demo",
+  "title": "Shieldmaiden Demo",
+  "description": "Cartoon female warrior sample sourced from a real web PNG for visible request-driven preview output.",
+  "bundleTarget": "main_cast",
+  "variants": [
+    {
+      "variantId": "default",
+      "label": "Default",
+      "skin": "default"
+    },
+    {
+      "variantId": "ceremonial",
+      "label": "Ceremonial",
+      "skin": "ceremonial"
+    }
+  ],
+  "requiredActions": [
+    "idle",
+    "attack"
+  ],
+  "requiredSlots": [
+    "weapon",
+    "head",
+    "body"
+  ]
+}

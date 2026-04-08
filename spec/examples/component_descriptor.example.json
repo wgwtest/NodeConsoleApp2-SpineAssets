@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "spine_component_descriptor_v1",
+  "presentationId": "hero_knight",
+  "componentId": "slot_weapon",
+  "slotName": "weapon",
+  "status": "pending_blackbox",
+  "sourceFiles": [
+    "art/concept.txt",
+    "notes/rig_notes.md",
+    "refs/moodboard.txt"
+  ],
+  "artifactFiles": []
+}
