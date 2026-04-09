@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -130,6 +131,46 @@ async function writeJobFixture(rootDir) {
   await writeFile(path.join(jobRoot, 'input', 'notes', 'rig_notes.md'), 'rig notes');
   await writeFile(path.join(jobRoot, 'input', 'refs', 'moodboard.txt'), 'moodboard');
   return jobRoot;
+}
+
+async function withFakeOpenAIResponsesServer(responseBody, run) {
+  const requests = [];
+  const server = http.createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const rawBody = Buffer.concat(chunks).toString('utf8');
+    requests.push({
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: rawBody.length > 0 ? JSON.parse(rawBody) : null
+    });
+    res.writeHead(200, {
+      'content-type': 'application/json',
+      'x-request-id': 'req_fake_123'
+    });
+    res.end(JSON.stringify(responseBody));
+  });
+
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}/v1`;
+
+  try {
+    return await run({ baseUrl, requests });
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close(error => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+  }
 }
 
 test('validateBlackboxJob 接受最小 prepared job fixture', async () => {
@@ -286,6 +327,149 @@ test('runBlackboxJobs 在 cloud_stub 下生成计划文件、证据与组件产�
       .then(() => true)
       .catch(() => false),
     true
+  );
+});
+
+test('runBlackboxJobs 在 cloud_stub 且配置 OPENAI_API_KEY 时优先走云端规划', async () => {
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'blackbox-job-run-cloud-live-'));
+  await writeVisualRequestFixture(tmpRoot);
+  const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
+  const jobsRoot = path.join(tmpRoot, 'workspace', 'blackbox_jobs');
+
+  await buildBlackboxJobs({
+    requestsRoot,
+    outputRoot: jobsRoot,
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub'
+  });
+
+  await withFakeOpenAIResponsesServer(
+    {
+      id: 'resp_fake_123',
+      output_text: JSON.stringify({
+        summary: 'cloud planner hit',
+        layerPlan: {
+          layers: [
+            {
+              slotName: 'body',
+              componentId: 'slot_body',
+              drawOrder: 0,
+              artifactPrompt: 'cartoon female warrior body armor',
+              notes: 'base silhouette'
+            },
+            {
+              slotName: 'head',
+              componentId: 'slot_head',
+              drawOrder: 1,
+              artifactPrompt: 'cartoon female warrior head and braid',
+              notes: 'keep face readable'
+            },
+            {
+              slotName: 'weapon',
+              componentId: 'slot_weapon',
+              drawOrder: 2,
+              artifactPrompt: 'cartoon round shield and spear',
+              notes: 'weapon silhouette should stay bold'
+            }
+          ]
+        },
+        slotMap: {
+          slots: [
+            {
+              slotName: 'body',
+              componentId: 'slot_body',
+              notes: 'torso and skirt'
+            },
+            {
+              slotName: 'head',
+              componentId: 'slot_head',
+              notes: 'helmet optional'
+            },
+            {
+              slotName: 'weapon',
+              componentId: 'slot_weapon',
+              notes: 'shield and spear share style language'
+            }
+          ]
+        },
+        variantPlan: {
+          variants: [
+            {
+              variantId: 'default',
+              label: 'Default',
+              skin: 'default',
+              requiredComponents: ['slot_body', 'slot_head', 'slot_weapon'],
+              notes: 'combat default'
+            },
+            {
+              variantId: 'ceremonial',
+              label: 'Ceremonial',
+              skin: 'ceremonial',
+              requiredComponents: ['slot_body', 'slot_head', 'slot_weapon'],
+              notes: 'more ornaments'
+            }
+          ]
+        }
+      }),
+      usage: {
+        input_tokens: 321,
+        output_tokens: 123
+      }
+    },
+    async ({ baseUrl, requests }) => {
+      const envBackup = {
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
+        OPENAI_BLACKBOX_MODEL: process.env.OPENAI_BLACKBOX_MODEL
+      };
+
+      process.env.OPENAI_API_KEY = 'test-key';
+      process.env.OPENAI_BASE_URL = baseUrl;
+      process.env.OPENAI_BLACKBOX_MODEL = 'gpt-5.4-mini';
+
+      try {
+        const result = await runBlackboxJobs({ jobsRoot });
+        assert.equal(result.jobs.length, 1);
+        assert.equal(result.jobs[0].status, 'succeeded');
+      } finally {
+        for (const [key, value] of Object.entries(envBackup)) {
+          if (value === undefined) {
+            delete process.env[key];
+          } else {
+            process.env[key] = value;
+          }
+        }
+      }
+
+      assert.equal(requests.length, 1);
+      assert.equal(requests[0].method, 'POST');
+      assert.equal(requests[0].url, '/v1/responses');
+      assert.equal(requests[0].body.model, 'gpt-5.4-mini');
+      assert.equal(requests[0].body.text.format.type, 'json_schema');
+      assert.equal(
+        requests[0].body.input[1].content.some(item => (
+          item.type === 'input_image' &&
+          item.image_url.startsWith('data:image/png;base64,')
+        )),
+        true
+      );
+
+      const jobRoot = path.join(jobsRoot, 'shieldmaiden_demo__req_shieldmaiden_demo_v001');
+      const providerReport = JSON.parse(
+        await fs.readFile(path.join(jobRoot, 'evidence', 'provider_report.json'), 'utf8')
+      );
+      assert.equal(providerReport.usedCloud, true);
+      assert.equal(providerReport.mode, 'cloud_response');
+      assert.equal(providerReport.responseId, 'resp_fake_123');
+      assert.equal(providerReport.model, 'gpt-5.4-mini');
+      assert.equal(providerReport.requestId, 'req_fake_123');
+
+      const layerPlan = JSON.parse(
+        await fs.readFile(path.join(jobRoot, 'artifacts', 'layer_plan.json'), 'utf8')
+      );
+      assert.equal(layerPlan.layers[2].artifactPrompt, 'cartoon round shield and spear');
+      assert.equal(layerPlan.layers[2].notes, 'weapon silhouette should stay bold');
+    }
   );
 });
 

@@ -22,9 +22,12 @@ async function resolvePackageReports(packagesRoot) {
 
   try {
     await fs.access(packageManifestPath);
-    return [await validateSpinePackage({ packageRoot: resolvedRoot })];
+    return [await validateSpinePackage({ packageRoot: resolvedRoot, requireBlackboxReady: false })];
   } catch {
-    return validateSpinePackageCollection({ packagesRoot: resolvedRoot });
+    return validateSpinePackageCollection({
+      packagesRoot: resolvedRoot,
+      requireBlackboxReady: false
+    });
   }
 }
 
@@ -40,6 +43,19 @@ function translateComponentStatus(status) {
       return '待黑盒加工';
     default:
       return status;
+  }
+}
+
+function translateReadiness(readiness) {
+  switch (readiness) {
+    case 'ready':
+      return '就绪';
+    case 'draft':
+      return '草稿';
+    case 'missing':
+      return '缺失';
+    default:
+      return readiness ?? '未声明';
   }
 }
 
@@ -99,7 +115,7 @@ function renderComponentItems(components, visualAssets) {
 
   return `<ul>${components
     .map(component => (
-      `<li><strong>${escapeHtml(component.componentId)}</strong> <span>${escapeHtml(translateComponentStatus(component.status))}</span></li>`
+      `<li><strong>${escapeHtml(component.componentId)}</strong> <span>${escapeHtml(translateComponentStatus(component.status))} / ${escapeHtml(translateReadiness(component.readiness))}</span></li>`
     ))
     .join('\n')}</ul>`;
 }

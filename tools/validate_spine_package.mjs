@@ -149,7 +149,12 @@ function validateVariantShape(variant, manifest, variantId) {
   assertRequiredArray(variant.requiredComponents, `variant.${variantId}.requiredComponents`);
 }
 
-function validateComponentDescriptorShape(descriptor, manifest, componentId) {
+function validateComponentDescriptorShape(
+  descriptor,
+  manifest,
+  componentId,
+  { requireBlackboxReady = true } = {}
+) {
   assertObject(descriptor, `component.${componentId}`);
 
   if (descriptor.schemaVersion !== 'spine_component_descriptor_v1') {
@@ -206,9 +211,31 @@ function validateComponentDescriptorShape(descriptor, manifest, componentId) {
   ) {
     throw new Error(`component.${componentId}.evidenceFiles 不能为空，因为 readiness=ready`);
   }
+
+  if (requireBlackboxReady) {
+    assertRequiredString(descriptor.blackboxJobId, `component.${componentId}.blackboxJobId`);
+    assertRequiredString(descriptor.providerType, `component.${componentId}.providerType`);
+    assertRequiredString(descriptor.providerName, `component.${componentId}.providerName`);
+    assertRequiredString(descriptor.readiness, `component.${componentId}.readiness`);
+    assertRequiredString(descriptor.reviewStatus, `component.${componentId}.reviewStatus`);
+    assertRequiredArray(descriptor.evidenceFiles, `component.${componentId}.evidenceFiles`);
+
+    if (descriptor.readiness !== 'ready') {
+      throw new Error(`component.${componentId}.readiness 必须为 ready`);
+    }
+    if (descriptor.artifactFiles.length === 0) {
+      throw new Error(`component.${componentId}.artifactFiles 不能为空，因为 strict 校验开启`);
+    }
+    if (descriptor.evidenceFiles.length === 0) {
+      throw new Error(`component.${componentId}.evidenceFiles 不能为空，因为 strict 校验开启`);
+    }
+  }
 }
 
-export async function validateSpinePackage({ packageRoot }) {
+export async function validateSpinePackage({
+  packageRoot,
+  requireBlackboxReady = true
+}) {
   if (!packageRoot) {
     throw new Error('缺少 packageRoot');
   }
@@ -262,7 +289,7 @@ export async function validateSpinePackage({ packageRoot }) {
     const descriptorPath = path.join(componentsRoot, componentId, 'descriptor.json');
     await assertPathExists(descriptorPath, `component descriptor ${componentId}`);
     const descriptor = await readJson(descriptorPath);
-    validateComponentDescriptorShape(descriptor, manifest, componentId);
+    validateComponentDescriptorShape(descriptor, manifest, componentId, { requireBlackboxReady });
 
     for (const relativePath of descriptor.sourceFiles) {
       assertRequiredString(relativePath, `component.${componentId}.sourceFiles[]`);
@@ -321,6 +348,7 @@ export async function validateSpinePackage({ packageRoot }) {
     variantCount: manifest.variantIds.length,
     exportableVariantCount: manifest.exportableVariantIds.length,
     componentCount: components.length,
+    requireBlackboxReady,
     manifest,
     requestSnapshot,
     components,
@@ -328,7 +356,10 @@ export async function validateSpinePackage({ packageRoot }) {
   };
 }
 
-export async function validateSpinePackageCollection({ packagesRoot }) {
+export async function validateSpinePackageCollection({
+  packagesRoot,
+  requireBlackboxReady = true
+}) {
   if (!packagesRoot) {
     throw new Error('缺少 packagesRoot');
   }
@@ -342,7 +373,7 @@ export async function validateSpinePackageCollection({ packagesRoot }) {
 
   const reports = [];
   for (const dir of packageDirs) {
-    reports.push(await validateSpinePackage({ packageRoot: dir }));
+    reports.push(await validateSpinePackage({ packageRoot: dir, requireBlackboxReady }));
   }
 
   return reports;

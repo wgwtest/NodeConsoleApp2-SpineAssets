@@ -38,6 +38,20 @@
 3. 主工程消费接入被后移到 `阶段D / D1`
 4. `C2` 第一阶段内部主线进一步细化为 `request -> blackbox -> package -> export`
 
+推荐执行顺序：
+
+```bash
+npm run blackbox:prepare -- cloud_stub openai_cloud_stub
+npm run blackbox:run -- cloud_stub openai_cloud_stub
+npm run blackbox:validate
+npm run blackbox:collect
+npm run packages:validate
+npm run packages:preview
+npm run exports:build
+npm run exports:validate
+npm run exports:preview
+```
+
 ## 快速开始
 
 1. 复制配置模板：
@@ -112,6 +126,14 @@ npm run blackbox:collect
 npm run blackbox:preview
 ```
 
+云端 AI 可选环境变量：
+
+```bash
+export OPENAI_API_KEY=...
+export OPENAI_BLACKBOX_MODEL=gpt-5.4-mini
+export OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
 说明：
 
 1. `blackbox:prepare` 会为每个 request 生成一个稳定 `jobId`
@@ -123,6 +145,9 @@ npm run blackbox:preview
 npm run blackbox:prepare -- cloud_stub openai_cloud_stub
 npm run blackbox:run -- cloud_stub openai_cloud_stub
 ```
+
+5. `cloud_stub` 在未配置 `OPENAI_API_KEY` 时会稳定回退为离线 stub，并把回退信息写进 `provider_report.json`
+6. 若已配置 `OPENAI_API_KEY`，则会优先尝试调用 OpenAI Responses API 获取真实规划 JSON；请求失败时 job 会明确标记为 `failed`
 
 当前 blackbox 基线产物：
 
@@ -160,8 +185,10 @@ npm run packages:preview
 说明：
 
 1. `packages:build` 会把 `workspace/requests/` 下的请求目录转换成最小可校验的 package 基线
-2. `packages:preview` 会把 `workspace/packages/` 下的 package 中间态写成可浏览的 HTML 页面和结构化报告
-3. 这三个命令会遍历 `workspace/requests/` 或 `workspace/packages/` 下的子目录
+2. `packages:build` 只生成 package 骨架与 `source/` 快照，不再直接把组件收口为 `ready`
+3. `packages:validate` 默认执行严格校验，只接受已经过 `blackbox:collect` 收口、且组件 `readiness=ready` 的 package
+4. `packages:preview` 会把 `workspace/packages/` 下的 package 中间态写成可浏览的 HTML 页面和结构化报告；即使仍在 `pending_blackbox` 阶段也可预览
+5. 这三个命令会遍历 `workspace/requests/` 或 `workspace/packages/` 下的子目录
 4. 单目录调试时，也可以直接运行：
 
 ```bash
@@ -209,7 +236,8 @@ npm run exports:preview
 说明：
 
 1. 当前 baseline 会把 `workspace/packages/` 下的所有 package 组装进同一个 `request_driven_bundle`
-2. 单目录调试时，也可以直接运行：
+2. `exports:build` 会校验每个 `variant.requiredComponents` 对应组件是否 `readiness=ready`，并要求 `reviewStatus` 位于允许导出集合
+3. 单目录调试时，也可以直接运行：
 
 ```bash
 node tools/build_request_bundle.mjs workspace/packages/<presentationId> workspace/exports/<bundleId> <bundleId>

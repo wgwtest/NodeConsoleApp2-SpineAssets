@@ -147,7 +147,10 @@ function buildComponentDescriptor({
   slot,
   sourceFiles,
   status = 'pending_blackbox',
-  artifactFiles = []
+  artifactFiles = [],
+  readiness = 'missing',
+  reviewStatus = 'unreviewed',
+  evidenceFiles = []
 }) {
   return {
     schemaVersion: 'spine_component_descriptor_v1',
@@ -156,7 +159,10 @@ function buildComponentDescriptor({
     slotName: slot,
     status,
     sourceFiles: [...sourceFiles],
-    artifactFiles: [...artifactFiles]
+    artifactFiles: [...artifactFiles],
+    readiness,
+    reviewStatus,
+    evidenceFiles: [...evidenceFiles]
   };
 }
 
@@ -231,32 +237,13 @@ export async function buildRequestPackage({
         ...copiedSources.noteFiles,
         ...copiedSources.refFiles
       ];
-      const primaryPngSource = findPrimaryPngSource(copiedSources.artFiles);
-      let status = 'pending_blackbox';
-      let artifactFiles = [];
-
-      if (primaryPngSource) {
-        const artifactRelativePath = path.posix.join(
-          packageManifest.componentsDir,
-          `slot_${slot}`,
-          'render.png'
-        );
-        await copyFileEnsured(
-          path.join(packageRoot, packageManifest.sourceRequestDir, primaryPngSource),
-          path.join(packageRoot, artifactRelativePath)
-        );
-        status = 'ready';
-        artifactFiles = [artifactRelativePath];
-      }
 
       await writeJson(
         path.join(packageRoot, packageManifest.componentsDir, `slot_${slot}`, 'descriptor.json'),
         buildComponentDescriptor({
           presentationId: request.presentationId,
           slot,
-          sourceFiles,
-          status,
-          artifactFiles
+          sourceFiles
         })
       );
     }

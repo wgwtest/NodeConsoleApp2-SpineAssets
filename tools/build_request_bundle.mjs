@@ -39,7 +39,8 @@ export async function buildRequestBundle({
   packagesRoot,
   outputRoot,
   bundleId = 'request_driven_bundle',
-  bundleVersion = '0.1.0'
+  bundleVersion = '0.1.0',
+  allowedReviewStatuses = ['unreviewed', 'approved']
 }) {
   if (!packagesRoot) {
     throw new Error('缺少 packagesRoot');
@@ -76,6 +77,9 @@ export async function buildRequestBundle({
     const spineJson = await readJson(path.join(spineRoot, manifest.skeletonFile));
     const animations = extractAnimations(spineJson);
     const slots = extractSlots(spineJson);
+    const componentsById = new Map(
+      report.components.map(component => [component.componentId, component])
+    );
 
     await fs.mkdir(characterDir, { recursive: true });
     await copyAsset(
@@ -95,16 +99,35 @@ export async function buildRequestBundle({
 
     const exportVariants = variants
       .filter(variant => manifest.exportableVariantIds.includes(variant.variantId))
-      .map(variant => ({
-        variantId: variant.variantId,
-        label: variant.label,
-        skin: variant.skin,
-        enabled: variant.enabled,
-        allowedAnimations: [...variant.allowedAnimations],
-        anchorProfileOverride: variant.anchorProfileOverride ?? null,
-        scaleProfileOverride: variant.scaleProfileOverride ?? null,
-        resourceOverrides: variant.resourceOverrides ?? {}
-      }));
+      .map(variant => {
+        for (const componentId of variant.requiredComponents) {
+          const component = componentsById.get(componentId);
+          if (!component) {
+            throw new Error(`variant ${variant.variantId} 缺少 required component: ${componentId}`);
+          }
+          if (component.readiness !== 'ready') {
+            throw new Error(
+              `variant ${variant.variantId} 的 component ${componentId} readiness=${component.readiness}`
+            );
+          }
+          if (!allowedReviewStatuses.includes(component.reviewStatus)) {
+            throw new Error(
+              `variant ${variant.variantId} 的 component ${componentId} reviewStatus=${component.reviewStatus} 不允许导出`
+            );
+          }
+        }
+
+        return {
+          variantId: variant.variantId,
+          label: variant.label,
+          skin: variant.skin,
+          enabled: variant.enabled,
+          allowedAnimations: [...variant.allowedAnimations],
+          anchorProfileOverride: variant.anchorProfileOverride ?? null,
+          scaleProfileOverride: variant.scaleProfileOverride ?? null,
+          resourceOverrides: variant.resourceOverrides ?? {}
+        };
+      });
 
     const characterManifest = {
       schemaVersion: 'spine_character_manifest_v2',

@@ -8,6 +8,9 @@ import {
   validateCharacterRequest,
   validateCharacterRequestCollection
 } from './validate_character_request.mjs';
+import { buildBlackboxJobs } from './build_blackbox_jobs.mjs';
+import { runBlackboxJobs } from './run_blackbox_jobs.mjs';
+import { collectBlackboxResults } from './collect_blackbox_results.mjs';
 import { buildRequestPackage } from './build_request_package.mjs';
 import { buildPackagePreview } from './build_package_preview.mjs';
 import {
@@ -91,6 +94,23 @@ async function writeVisualRequestFixture(rootDir) {
   return requestRoot;
 }
 
+async function prepareCollectedPackages(rootDir, requestsRoot, packagesRoot) {
+  const jobsRoot = path.join(rootDir, 'workspace', 'blackbox_jobs');
+  await buildBlackboxJobs({
+    requestsRoot,
+    outputRoot: jobsRoot,
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub'
+  });
+  await runBlackboxJobs({ jobsRoot });
+  await collectBlackboxResults({
+    requestsRoot,
+    jobsRoot,
+    packagesRoot
+  });
+  return jobsRoot;
+}
+
 async function writePackageFixture(rootDir) {
   const packageRoot = path.join(rootDir, 'workspace', 'packages', 'hero_knight');
   await writeJson(path.join(packageRoot, 'package_manifest.json'), {
@@ -156,7 +176,13 @@ async function writePackageFixture(rootDir) {
     slotName: 'weapon',
     status: 'ready',
     sourceFiles: ['art/concept.txt', 'notes/rig_notes.md', 'refs/moodboard.txt'],
-    artifactFiles: ['components/slot_weapon/render.png']
+    artifactFiles: ['components/slot_weapon/render.png'],
+    blackboxJobId: 'hero_knight__req_hero_knight_v001',
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub',
+    readiness: 'ready',
+    reviewStatus: 'unreviewed',
+    evidenceFiles: ['evidence/provider_report.json']
   });
   await writeFile(path.join(packageRoot, 'components', 'slot_weapon', 'render.png'));
   await writeJson(path.join(packageRoot, 'components', 'slot_head', 'descriptor.json'), {
@@ -166,9 +192,22 @@ async function writePackageFixture(rootDir) {
     slotName: 'head',
     status: 'ready',
     sourceFiles: ['art/concept.txt', 'notes/rig_notes.md', 'refs/moodboard.txt'],
-    artifactFiles: ['components/slot_head/render.png']
+    artifactFiles: ['components/slot_head/render.png'],
+    blackboxJobId: 'hero_knight__req_hero_knight_v001',
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub',
+    readiness: 'ready',
+    reviewStatus: 'unreviewed',
+    evidenceFiles: ['evidence/provider_report.json']
   });
   await writeFile(path.join(packageRoot, 'components', 'slot_head', 'render.png'));
+  await writeJson(path.join(packageRoot, 'evidence', 'provider_report.json'), {
+    schemaVersion: 'blackbox_provider_report_v1',
+    jobId: 'hero_knight__req_hero_knight_v001',
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub',
+    usedCloud: false
+  });
   await writeJson(path.join(packageRoot, 'spine', 'hero_knight.json'), {
     skeleton: {
       spine: '4.2.22'
@@ -216,7 +255,7 @@ test('validateCharacterRequestCollection 可以遍历 requests 根目录', async
   assert.equal(reports[0].presentationId, 'hero_knight');
 });
 
-test('buildRequestPackage 从 requests 根目录生成最小 package 并通过校验', async () => {
+test('buildRequestPackage 从 requests 根目录生成最小 package 骨架，但未收口前不能通过严格校验', async () => {
   const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'request-package-build-'));
   await writeRequestFixture(tmpRoot);
   const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
@@ -232,9 +271,10 @@ test('buildRequestPackage 从 requests 根目录生成最小 package 并通过�
   assert.equal(result.packages[0].defaultVariantId, 'default');
 
   const packageRoot = path.join(packagesRoot, 'hero_knight');
-  const report = await validateSpinePackage({ packageRoot });
-  assert.equal(report.ok, true);
-  assert.deepEqual(report.manifest.texturePages, ['hero_knight.png']);
+  await assert.rejects(
+    () => validateSpinePackage({ packageRoot }),
+    /blackboxJobId|readiness|evidenceFiles/
+  );
 
   const packageManifest = JSON.parse(
     await fs.readFile(path.join(packageRoot, 'package_manifest.json'), 'utf8')
@@ -268,12 +308,15 @@ test('buildRequestPackage 从 requests 根目录生成最小 package 并通过�
   assert.equal(weaponDescriptor.componentId, 'slot_weapon');
   assert.equal(weaponDescriptor.slotName, 'weapon');
   assert.equal(weaponDescriptor.status, 'pending_blackbox');
+  assert.equal(weaponDescriptor.readiness, 'missing');
+  assert.equal(weaponDescriptor.reviewStatus, 'unreviewed');
   assert.deepEqual(weaponDescriptor.sourceFiles, [
     'art/concept.txt',
     'notes/rig_notes.md',
     'refs/moodboard.txt'
   ]);
   assert.deepEqual(weaponDescriptor.artifactFiles, []);
+  assert.deepEqual(weaponDescriptor.evidenceFiles, []);
 
   assert.equal(
     await fs
@@ -298,7 +341,7 @@ test('buildRequestPackage 从 requests 根目录生成最小 package 并通过�
   );
 });
 
-test('buildRequestPackage 当 request 含 PNG 原画时生成 ready 组件与真实预览纹理', async () => {
+test('buildRequestPackage 当 request 含 PNG 原画时仍保持待黑盒加工，但保留真实预览纹理', async () => {
   const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'visual-request-package-build-'));
   const requestRoot = await writeVisualRequestFixture(tmpRoot);
   const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
@@ -316,17 +359,21 @@ test('buildRequestPackage 当 request 含 PNG 原画时生成 ready 组件与真
       'utf8'
     )
   );
-  assert.equal(descriptor.status, 'ready');
-  assert.deepEqual(descriptor.artifactFiles, ['components/slot_weapon/render.png']);
+  assert.equal(descriptor.status, 'pending_blackbox');
+  assert.equal(descriptor.readiness, 'missing');
+  assert.deepEqual(descriptor.artifactFiles, []);
 
   const sourcePng = await fs.readFile(path.join(requestRoot, 'art', 'female_warrior.png'));
   const texturePng = await fs.readFile(path.join(packageRoot, 'spine', 'shieldmaiden_demo.png'));
-  const artifactPng = await fs.readFile(
-    path.join(packageRoot, 'components', 'slot_weapon', 'render.png')
-  );
 
   assert.deepEqual(texturePng, sourcePng);
-  assert.deepEqual(artifactPng, sourcePng);
+  assert.equal(
+    await fs
+      .access(path.join(packageRoot, 'components', 'slot_weapon', 'render.png'))
+      .then(() => true)
+      .catch(() => false),
+    false
+  );
 });
 
 test('buildRequestPackage 会清理已从 requests 中移除的旧 package', async () => {
@@ -439,9 +486,9 @@ test('buildPackagePreview 对含图片组件的 package 输出可视缩略图', 
   });
 
   assert.match(preview.html, /shieldmaiden_demo/);
-  assert.match(preview.html, /render\.png/);
+  assert.match(preview.html, /female_warrior\.png/);
   assert.match(preview.html, /源原画/);
-  assert.match(preview.html, /已就绪/);
+  assert.match(preview.html, /待黑盒加工/);
 });
 
 test('validateSpinePackage 接受最小 package fixture', async () => {
@@ -529,10 +576,7 @@ test('buildRequestBundle 会清理已从 packages 中移除的旧角色目录', 
   const packagesRoot = path.join(tmpRoot, 'workspace', 'packages');
   const outputRoot = path.join(tmpRoot, 'workspace', 'exports', 'request_driven_bundle');
 
-  await buildRequestPackage({
-    requestsRoot,
-    outputRoot: packagesRoot
-  });
+  await prepareCollectedPackages(tmpRoot, requestsRoot, packagesRoot);
 
   const firstBuild = await buildRequestBundle({
     packagesRoot,
@@ -542,10 +586,7 @@ test('buildRequestBundle 会清理已从 packages 中移除的旧角色目录', 
   assert.equal(firstBuild.bundle.characters.length, 2);
 
   await fs.rm(path.join(requestsRoot, 'req_hero_knight_v001'), { recursive: true, force: true });
-  await buildRequestPackage({
-    requestsRoot,
-    outputRoot: packagesRoot
-  });
+  await prepareCollectedPackages(tmpRoot, requestsRoot, packagesRoot);
 
   const secondBuild = await buildRequestBundle({
     packagesRoot,
@@ -594,6 +635,27 @@ test('validateRequestBundle 在导出完整时通过，在资源缺失时失败'
   await assert.rejects(
     () => validateRequestBundle({ bundleRoot: outputRoot }),
     /hero_knight\.atlas/
+  );
+});
+
+test('buildRequestBundle 在 requiredComponents 的 reviewStatus 不允许导出时失败', async () => {
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'request-build-review-gate-'));
+  const packageRoot = await writePackageFixture(tmpRoot);
+  const packagesRoot = path.join(tmpRoot, 'workspace', 'packages');
+  const outputRoot = path.join(tmpRoot, 'workspace', 'exports', 'main_cast');
+
+  const descriptorPath = path.join(packageRoot, 'components', 'slot_weapon', 'descriptor.json');
+  const descriptor = JSON.parse(await fs.readFile(descriptorPath, 'utf8'));
+  descriptor.reviewStatus = 'rejected';
+  await fs.writeFile(descriptorPath, JSON.stringify(descriptor, null, 2), 'utf8');
+
+  await assert.rejects(
+    () => buildRequestBundle({
+      packagesRoot,
+      outputRoot,
+      bundleId: 'main_cast'
+    }),
+    /reviewStatus/
   );
 });
 
