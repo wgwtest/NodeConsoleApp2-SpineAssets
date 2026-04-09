@@ -2,6 +2,8 @@ node_modules/
 workspace/imports/*.json
 workspace/packages/*
 !workspace/packages/.gitkeep
+workspace/blackbox_jobs/*
+!workspace/blackbox_jobs/.gitkeep
 workspace/exports/*
 workspace/preview/*
 workspace/spine_projects/*

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "blackbox_job_v1",
+  "jobId": "shieldmaiden_demo__req_shieldmaiden_demo_v001",
+  "characterRequestId": "req_shieldmaiden_demo_v001",
+  "presentationId": "shieldmaiden_demo",
+  "providerType": "manual",
+  "providerName": "manual",
+  "status": "prepared",
+  "requestedSlots": [
+    "body",
+    "head",
+    "weapon"
+  ],
+  "requestedVariants": [
+    "default",
+    "ceremonial"
+  ],
+  "createdAt": "2026-04-09T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "inputSnapshot": {
+    "requestJson": "input/request.json",
+    "artFiles": [
+      "input/art/female_warrior.png"
+    ],
+    "noteFiles": [
+      "input/notes/brief.md"
+    ],
+    "refFiles": [
+      "input/refs/source_attribution.md"
+    ]
+  },
+  "outputs": {
+    "layerPlanFile": null,
+    "slotMapFile": null,
+    "variantPlanFile": null,
+    "componentArtifacts": {}
+  },
+  "errors": []
+}

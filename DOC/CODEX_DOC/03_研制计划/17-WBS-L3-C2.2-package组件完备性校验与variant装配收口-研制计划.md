@@ -9,6 +9,7 @@
 1. 组件完备性状态与最小字段约定
 2. `variant.requiredComponents` 与组件目录之间的一致性校验
 3. package/export 对不完整组件的拒绝规则与报告输出
+4. `readiness / reviewStatus / evidenceFiles` 的导出门槛
 
 ## 3. 进入条件
 
@@ -17,6 +18,6 @@
 
 ## 4. 关闭标准
 
-1. 缺失组件、组件加工未完成或组件状态不允许导出时，package/export 会稳定失败
+1. 缺失组件、组件加工未完成、组件 evidence 不完整或组件状态不允许导出时，package/export 会稳定失败
 2. 同一 `presentationId` 下多个 `variant` 的组件覆盖关系可以被机器报告出来
 3. 组件完备 package 通过后，正式 export 行为与 `C1` 主线保持兼容

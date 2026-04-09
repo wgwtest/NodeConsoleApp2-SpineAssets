@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "blackbox_job_v1",
+  "jobId": "hero_knight__req_hero_knight_v001",
+  "characterRequestId": "req_hero_knight_v001",
+  "presentationId": "hero_knight",
+  "providerType": "manual",
+  "providerName": "manual",
+  "status": "prepared",
+  "requestedSlots": [
+    "weapon",
+    "head"
+  ],
+  "requestedVariants": [
+    "default",
+    "winter"
+  ],
+  "createdAt": "2026-04-09T00:00:00.000Z",
+  "updatedAt": "2026-04-09T00:00:00.000Z",
+  "inputSnapshot": {
+    "requestJson": "input/request.json",
+    "artFiles": [
+      "input/art/concept.txt"
+    ],
+    "noteFiles": [
+      "input/notes/rig_notes.md"
+    ],
+    "refFiles": [
+      "input/refs/moodboard.txt"
+    ]
+  },
+  "outputs": {
+    "layerPlanFile": null,
+    "slotMapFile": null,
+    "variantPlanFile": null,
+    "componentArtifacts": {}
+  },
+  "errors": []
+}

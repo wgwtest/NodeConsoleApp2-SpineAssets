@@ -3,13 +3,13 @@
 当前状态概览：
 
 1. 当前活跃节点：`C2 角色原画黑盒加工与组件化 package 完善`
-2. 当前状态：`阶段C 持续推进，C1 已完成，C2 开始进入实现准备`
+2. 当前状态：`阶段C 持续推进，C1 已完成，C2 调整为 blackbox 编排框架优先`
 3. 当前待人工验收叶子：
    - `A1 项目底座与契约建立`
    - `A2.1 双仓库协作模式与变更流程`
    - `A2.2 presentation_catalog与bundle_manifest版本化契约`
    - `B1 官方样本bundle验证链路`
-4. 下一建议执行节点：`C2.1 request 到组件黑盒加工接口与过程留痕`
+4. 下一建议执行节点：`C2.3 blackbox 任务编排、人工回填与云端 AI stub 接入`
 
 当前有效计划：
 
@@ -28,5 +28,6 @@
 13. [15-WBS-L2-C2-角色原画黑盒加工与组件化package完善-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/15-WBS-L2-C2-角色原画黑盒加工与组件化package完善-研制计划.md)
 14. [16-WBS-L3-C2.1-request到组件黑盒加工接口与过程留痕-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/16-WBS-L3-C2.1-request到组件黑盒加工接口与过程留痕-研制计划.md)
 15. [17-WBS-L3-C2.2-package组件完备性校验与variant装配收口-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/17-WBS-L3-C2.2-package组件完备性校验与variant装配收口-研制计划.md)
-16. [13-WBS-L1-阶段D-主工程接入与交付收口-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/13-WBS-L1-阶段D-主工程接入与交付收口-研制计划.md)
-17. [14-WBS-L2-D1-主工程导入接入与bundle交付规范-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/14-WBS-L2-D1-主工程导入接入与bundle交付规范-研制计划.md)
+16. [18-WBS-L3-C2.3-blackbox任务编排、人工回填与云端AI-stub接入-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/18-WBS-L3-C2.3-blackbox任务编排、人工回填与云端AI-stub接入-研制计划.md)
+17. [13-WBS-L1-阶段D-主工程接入与交付收口-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/13-WBS-L1-阶段D-主工程接入与交付收口-研制计划.md)
+18. [14-WBS-L2-D1-主工程导入接入与bundle交付规范-研制计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/03_研制计划/14-WBS-L2-D1-主工程导入接入与bundle交付规范-研制计划.md)

@@ -12,3 +12,4 @@
 
 1. [2026-04-07-B1官方样本bundle验证链路-实施计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-07-B1官方样本bundle验证链路-实施计划.md)
 2. [2026-04-08-C1-request-driven-spine-production-implementation-plan](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-08-C1-request-driven-spine-production-implementation-plan.md)
+3. [2026-04-09-C2-blackbox-orchestration-cloud-stub-implementation-plan](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-09-C2-blackbox-orchestration-cloud-stub-implementation-plan.md)

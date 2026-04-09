@@ -29,13 +29,14 @@
 当前阶段进展：
 
 1. `C1` 已完成最小 `request -> package -> export` 主线、校验链与预览证据
-2. 当前转入 `C2`，补齐本仓库内部的组件黑盒加工接口、过程留痕与 variant 装配完备性
+2. 当前转入 `C2`，优先补齐 blackbox 任务编排框架、过程留痕、云端 AI stub 与 variant 装配完备性
 
 当前主线说明：
 
 1. 正式生产主线已经切换为 `request -> package -> export`
 2. `B1` 官方样本链继续保留，但只作为回归验证线
 3. 主工程消费接入被后移到 `阶段D / D1`
+4. `C2` 第一阶段内部主线进一步细化为 `request -> blackbox -> package -> export`
 
 ## 快速开始
 
@@ -66,14 +67,46 @@ workspace/imports/game_catalog.json
 
 1. `workspace/requests/`
    - 正式输入目录，一个角色一个 `character_request`
-2. `workspace/packages/`
+2. `workspace/blackbox_jobs/`
+   - blackbox 运行态 job、输入快照、证据和日志
+3. `workspace/packages/`
    - 仓内标准中间态，不对主工程暴露
-3. `workspace/exports/`
+4. `workspace/exports/`
    - 主工程正式消费的交付物
-4. `workspace/preview/`
+5. `workspace/preview/`
    - 人工验收截图、HTML 证据页和结构化报告
+5. `workspace/blackbox_jobs/`
+   - 黑盒任务工作目录、证据与日志
 
 ## C1.1 契约校验命令
+
+## C2.3 blackbox 编排基线命令
+
+从 `workspace/requests/` 生成 blackbox job 工作目录：
+
+```bash
+npm run blackbox:prepare
+```
+
+校验当前 `blackbox_jobs` 根目录：
+
+```bash
+npm run blackbox:validate
+```
+
+说明：
+
+1. `blackbox:prepare` 会为每个 request 生成一个稳定 `jobId`
+2. job 会冻结 `input/request.json` 与 `input/art|notes|refs`
+3. 当前第一阶段默认 provider 是 `manual`
+
+当前 blackbox 基线产物：
+
+1. `workspace/blackbox_jobs/<jobId>/job.json`
+2. `workspace/blackbox_jobs/<jobId>/input/`
+3. `workspace/blackbox_jobs/<jobId>/artifacts/`
+4. `workspace/blackbox_jobs/<jobId>/evidence/`
+5. `workspace/blackbox_jobs/<jobId>/logs/`
 
 从 `workspace/requests/` 生成最小 package 脚手架：
 
