@@ -3,11 +3,21 @@
   "presentationId": "hero_knight",
   "componentId": "slot_weapon",
   "slotName": "weapon",
-  "status": "pending_blackbox",
+  "status": "ready",
   "sourceFiles": [
     "art/concept.txt",
     "notes/rig_notes.md",
     "refs/moodboard.txt"
   ],
-  "artifactFiles": []
+  "artifactFiles": [
+    "components/slot_weapon/render.png"
+  ],
+  "blackboxJobId": "hero_knight__req_hero_knight_v001",
+  "providerType": "cloud_stub",
+  "providerName": "openai_cloud_stub",
+  "readiness": "ready",
+  "reviewStatus": "unreviewed",
+  "evidenceFiles": [
+    "evidence/provider_report.json"
+  ]
 }

@@ -25,6 +25,18 @@ function assertRequiredBoolean(value, label) {
   }
 }
 
+function assertOptionalString(value, label) {
+  if (value !== undefined && typeof value !== 'string') {
+    throw new Error(`${label} 必须是 string`);
+  }
+}
+
+function assertOptionalArray(value, label) {
+  if (value !== undefined && !Array.isArray(value)) {
+    throw new Error(`${label} 必须是 array`);
+  }
+}
+
 async function assertPathExists(filePath, label) {
   try {
     await fs.access(filePath);
@@ -163,8 +175,36 @@ function validateComponentDescriptorShape(descriptor, manifest, componentId) {
   }
   assertRequiredArray(descriptor.sourceFiles, `component.${componentId}.sourceFiles`);
   assertRequiredArray(descriptor.artifactFiles, `component.${componentId}.artifactFiles`);
+  assertOptionalString(descriptor.blackboxJobId, `component.${componentId}.blackboxJobId`);
+  assertOptionalString(descriptor.providerType, `component.${componentId}.providerType`);
+  assertOptionalString(descriptor.providerName, `component.${componentId}.providerName`);
+  assertOptionalString(descriptor.readiness, `component.${componentId}.readiness`);
+  assertOptionalString(descriptor.reviewStatus, `component.${componentId}.reviewStatus`);
+  assertOptionalArray(descriptor.evidenceFiles, `component.${componentId}.evidenceFiles`);
+
+  if (
+    descriptor.readiness !== undefined &&
+    !['missing', 'draft', 'ready'].includes(descriptor.readiness)
+  ) {
+    throw new Error(`component.${componentId}.readiness 不支持: ${descriptor.readiness}`);
+  }
+  if (
+    descriptor.reviewStatus !== undefined &&
+    !['unreviewed', 'approved', 'rejected'].includes(descriptor.reviewStatus)
+  ) {
+    throw new Error(`component.${componentId}.reviewStatus 不支持: ${descriptor.reviewStatus}`);
+  }
   if (descriptor.status === 'ready' && descriptor.artifactFiles.length === 0) {
     throw new Error(`component.${componentId}.artifactFiles 不能为空，因为状态为 ready`);
+  }
+  if (descriptor.readiness === 'ready' && descriptor.artifactFiles.length === 0) {
+    throw new Error(`component.${componentId}.artifactFiles 不能为空，因为 readiness=ready`);
+  }
+  if (
+    descriptor.readiness === 'ready' &&
+    (!Array.isArray(descriptor.evidenceFiles) || descriptor.evidenceFiles.length === 0)
+  ) {
+    throw new Error(`component.${componentId}.evidenceFiles 不能为空，因为 readiness=ready`);
   }
 }
 
@@ -238,6 +278,16 @@ export async function validateSpinePackage({ packageRoot }) {
         path.join(resolvedRoot, relativePath),
         `component artifact ${componentId}:${relativePath}`
       );
+    }
+
+    if (Array.isArray(descriptor.evidenceFiles)) {
+      for (const relativePath of descriptor.evidenceFiles) {
+        assertRequiredString(relativePath, `component.${componentId}.evidenceFiles[]`);
+        await assertPathExists(
+          path.join(resolvedRoot, relativePath),
+          `component evidence ${componentId}:${relativePath}`
+        );
+      }
     }
 
     components.push(descriptor);

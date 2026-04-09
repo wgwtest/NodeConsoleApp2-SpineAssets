@@ -31,6 +31,27 @@
     "artifactFiles": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "blackboxJobId": {
+      "type": "string"
+    },
+    "providerType": {
+      "type": "string"
+    },
+    "providerName": {
+      "type": "string"
+    },
+    "readiness": {
+      "type": "string",
+      "enum": ["missing", "draft", "ready"]
+    },
+    "reviewStatus": {
+      "type": "string",
+      "enum": ["unreviewed", "approved", "rejected"]
+    },
+    "evidenceFiles": {
+      "type": "array",
+      "items": { "type": "string" }
     }
   }
 }

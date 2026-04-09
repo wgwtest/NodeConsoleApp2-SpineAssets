@@ -1,6 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import {
+  BLACKBOX_PROVIDER_REPORT_FILE,
+  resolveArtifactFile
+} from './lib/blackbox_shared.mjs';
+
 function assertObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${label} 必须是 object`);
@@ -91,6 +96,61 @@ function validateBlackboxJobShape(job) {
   assertObject(job.outputs.componentArtifacts, 'blackbox_job.outputs.componentArtifacts');
 }
 
+function assertOptionalStringOrNull(value, label) {
+  if (value !== null && typeof value !== 'string') {
+    throw new Error(`${label} 必须是 string 或 null`);
+  }
+}
+
+async function assertOptionalOutputPath(jobRoot, relativePath, label) {
+  assertOptionalStringOrNull(relativePath, label);
+  if (typeof relativePath === 'string') {
+    await assertPathExists(path.join(jobRoot, relativePath), label);
+  }
+}
+
+async function validateJobOutputs(jobRoot, job) {
+  await assertOptionalOutputPath(jobRoot, job.outputs.layerPlanFile, 'blackbox output layerPlanFile');
+  await assertOptionalOutputPath(jobRoot, job.outputs.slotMapFile, 'blackbox output slotMapFile');
+  await assertOptionalOutputPath(
+    jobRoot,
+    job.outputs.variantPlanFile,
+    'blackbox output variantPlanFile'
+  );
+
+  for (const [slotName, artifactEntry] of Object.entries(job.outputs.componentArtifacts)) {
+    assertRequiredString(slotName, 'blackbox_job.outputs.componentArtifacts key');
+    const artifactFile = resolveArtifactFile(artifactEntry);
+    assertRequiredString(
+      artifactFile,
+      `blackbox_job.outputs.componentArtifacts.${slotName}.artifactFile`
+    );
+    await assertPathExists(
+      path.join(jobRoot, artifactFile),
+      `blackbox output component artifact ${slotName}`
+    );
+  }
+
+  if (['succeeded', 'manual_completed'].includes(job.status)) {
+    if (!job.outputs.layerPlanFile) {
+      throw new Error('succeeded/manual_completed job 缺少 outputs.layerPlanFile');
+    }
+    if (!job.outputs.slotMapFile) {
+      throw new Error('succeeded/manual_completed job 缺少 outputs.slotMapFile');
+    }
+    if (!job.outputs.variantPlanFile) {
+      throw new Error('succeeded/manual_completed job 缺少 outputs.variantPlanFile');
+    }
+    if (Object.keys(job.outputs.componentArtifacts).length !== job.requestedSlots.length) {
+      throw new Error('succeeded/manual_completed job 的 componentArtifacts 数量不完整');
+    }
+    await assertPathExists(
+      path.join(jobRoot, BLACKBOX_PROVIDER_REPORT_FILE),
+      'blackbox provider report'
+    );
+  }
+}
+
 export async function validateBlackboxJob({ jobRoot }) {
   if (!jobRoot) {
     throw new Error('缺少 jobRoot');
@@ -123,6 +183,8 @@ export async function validateBlackboxJob({ jobRoot }) {
     assertRequiredString(relativePath, 'blackbox_job.inputSnapshot.refFiles[]');
     await assertPathExists(path.join(resolvedRoot, relativePath), `blackbox input ref ${relativePath}`);
   }
+
+  await validateJobOutputs(resolvedRoot, job);
 
   return {
     ok: true,

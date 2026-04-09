@@ -94,11 +94,35 @@ npm run blackbox:prepare
 npm run blackbox:validate
 ```
 
+执行 provider，生成 blackbox 计划文件、证据与组件图：
+
+```bash
+npm run blackbox:run
+```
+
+把 blackbox 结果收口回 package：
+
+```bash
+npm run blackbox:collect
+```
+
+生成黑盒任务预览页：
+
+```bash
+npm run blackbox:preview
+```
+
 说明：
 
 1. `blackbox:prepare` 会为每个 request 生成一个稳定 `jobId`
 2. job 会冻结 `input/request.json` 与 `input/art|notes|refs`
 3. 当前第一阶段默认 provider 是 `manual`
+4. 需要走云端 stub 时，可以直接覆盖 prepare/run 的 provider：
+
+```bash
+npm run blackbox:prepare -- cloud_stub openai_cloud_stub
+npm run blackbox:run -- cloud_stub openai_cloud_stub
+```
 
 当前 blackbox 基线产物：
 
@@ -107,6 +131,7 @@ npm run blackbox:validate
 3. `workspace/blackbox_jobs/<jobId>/artifacts/`
 4. `workspace/blackbox_jobs/<jobId>/evidence/`
 5. `workspace/blackbox_jobs/<jobId>/logs/`
+6. `workspace/preview/blackbox/index.html`
 
 从 `workspace/requests/` 生成最小 package 脚手架：
 
