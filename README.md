@@ -247,6 +247,12 @@ npm run exports:validate
 npm run exports:preview
 ```
 
+生成单页全过程验收模板：
+
+```bash
+npm run workflow:preview
+```
+
 说明：
 
 1. 当前 baseline 会把 `workspace/packages/` 下的所有 package 组装进同一个 `request_driven_bundle`
@@ -266,6 +272,18 @@ node tools/build_request_preview.mjs workspace/exports/<bundleId> workspace/prev
 1. `workspace/preview/request_driven_bundle/index.html`
 2. `workspace/preview/request_driven_bundle/report.json`
 3. `workspace/preview/request_driven_bundle/assets/`
+
+当前全过程验收预览产物：
+
+1. `workspace/preview/workflow/index.html`
+2. `workspace/preview/workflow/report.json`
+3. `workspace/preview/workflow/assets/`
+
+说明：
+
+1. `workflow:preview` 会把同一案例的 `request -> blackbox prepare -> blackbox run -> package collect -> export bundle -> paperdollObject` 串成一个单页
+2. 页面会直接展开关键输入/输出文件，包括 `request.json / job.json / layer_plan.json / slot_map.json / variant_plan.json / descriptor.json / character_manifest.json`
+3. 最后一步的 `paperdollObject` 是从 package 和 export 数据派生的运行时快照，用于人工验收，不代表已经接入战斗运行时
 
 ## B1 官方样本回归验证
 

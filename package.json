@@ -15,6 +15,7 @@
     "packages:build": "node tools/build_request_package.mjs workspace/requests workspace/packages",
     "packages:validate": "node tools/validate_spine_package.mjs workspace/packages",
     "packages:preview": "node tools/build_package_preview.mjs workspace/packages workspace/preview/packages",
+    "workflow:preview": "node tools/build_workflow_preview.mjs workspace/requests workspace/blackbox_jobs workspace/packages workspace/exports/request_driven_bundle workspace/preview/workflow",
     "exports:build": "node tools/build_request_bundle.mjs workspace/packages workspace/exports/request_driven_bundle request_driven_bundle",
     "exports:validate": "node tools/validate_request_bundle.mjs workspace/exports/request_driven_bundle",
     "exports:preview": "node tools/build_request_preview.mjs workspace/exports/request_driven_bundle workspace/preview/request_driven_bundle",

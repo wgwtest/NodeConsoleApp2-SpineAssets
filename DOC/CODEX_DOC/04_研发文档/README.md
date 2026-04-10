@@ -14,3 +14,4 @@
 2. [2026-04-08-C1-request-driven-spine-production-implementation-plan](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-08-C1-request-driven-spine-production-implementation-plan.md)
 3. [2026-04-09-C2-blackbox-orchestration-cloud-stub-implementation-plan](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-09-C2-blackbox-orchestration-cloud-stub-implementation-plan.md)
 4. [2026-04-10-C2.2-variant-plan-assembly-implementation-plan](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-10-C2.2-variant-plan-assembly-implementation-plan.md)
+5. [2026-04-10-C2.4-workflow-acceptance-preview-implementation-plan](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-10-C2.4-workflow-acceptance-preview-implementation-plan.md)

@@ -796,3 +796,72 @@ test('buildRequestPreview 生成 request-driven 预览页与报告', async () =>
     true
   );
 });
+
+test('buildWorkflowPreview 生成包含全过程步骤、输入输出与 paperdoll object 的验收页', async () => {
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'workflow-preview-'));
+  await writeVisualRequestFixture(tmpRoot);
+  const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
+  const packagesRoot = path.join(tmpRoot, 'workspace', 'packages');
+  const jobsRoot = await prepareCollectedPackages(tmpRoot, requestsRoot, packagesRoot);
+  const bundleRoot = path.join(tmpRoot, 'workspace', 'exports', 'request_driven_bundle');
+  const previewRoot = path.join(tmpRoot, 'workspace', 'preview', 'workflow');
+
+  await buildRequestBundle({
+    packagesRoot,
+    outputRoot: bundleRoot,
+    bundleId: 'request_driven_bundle'
+  });
+
+  const { buildWorkflowPreview } = await import('./build_workflow_preview.mjs');
+  const preview = await buildWorkflowPreview({
+    requestsRoot,
+    jobsRoot,
+    packagesRoot,
+    bundleRoot,
+    outputRoot: previewRoot
+  });
+
+  assert.match(preview.html, /全过程验收/);
+  assert.match(preview.html, /步骤 1.*输入样例图与补充需求/);
+  assert.match(preview.html, /步骤 2.*Blackbox Prepare/);
+  assert.match(preview.html, /步骤 3.*Blackbox Run/);
+  assert.match(preview.html, /步骤 4.*Package Collect/);
+  assert.match(preview.html, /步骤 5.*Export Bundle/);
+  assert.match(preview.html, /步骤 6.*Paperdoll Object/);
+  assert.match(preview.html, /request\.json/);
+  assert.match(preview.html, /job\.json/);
+  assert.match(preview.html, /layer_plan\.json/);
+  assert.match(preview.html, /slot_map\.json/);
+  assert.match(preview.html, /variant_plan\.json/);
+  assert.match(preview.html, /descriptor\.json/);
+  assert.match(preview.html, /character_manifest\.json/);
+  assert.match(preview.html, /input/);
+  assert.match(preview.html, /output/);
+  assert.match(preview.html, /paperdollObject/);
+
+  assert.equal(preview.report.cases.length, 1);
+  assert.equal(preview.report.cases[0].presentationId, 'shieldmaiden_demo');
+  assert.equal(preview.report.cases[0].characterRequestId, 'req_shieldmaiden_demo_v001');
+  assert.equal(preview.report.cases[0].steps.length, 6);
+  assert.equal(preview.report.cases[0].paperdollObject.presentationId, 'shieldmaiden_demo');
+  assert.equal(preview.report.cases[0].paperdollObject.defaultVariantId, 'default');
+  assert.equal(preview.report.cases[0].paperdollObject.variants.length, 1);
+  assert.equal(
+    preview.report.cases[0].paperdollObject.runtimeAssets.characterManifest,
+    'characters/shieldmaiden_demo/character_manifest.json'
+  );
+  assert.equal(
+    await fs
+      .access(path.join(previewRoot, 'index.html'))
+      .then(() => true)
+      .catch(() => false),
+    true
+  );
+  assert.equal(
+    await fs
+      .access(path.join(previewRoot, 'report.json'))
+      .then(() => true)
+      .catch(() => false),
+    true
+  );
+});
