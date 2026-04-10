@@ -15,6 +15,17 @@ import {
   writeJson
 } from './lib/blackbox_shared.mjs';
 
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function sanitizeStringArray(value) {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+  return value.filter(item => typeof item === 'string' && item.length > 0);
+}
+
 function deriveDescriptorReadiness({ jobStatus, artifactFiles, evidenceFiles }) {
   if (artifactFiles.length > 0 && evidenceFiles.length > 0) {
     return 'ready';
@@ -105,6 +116,65 @@ async function overlayJobIntoPackage({
     packageRoot,
     targetRelativePath: 'blackbox/variant_plan.json'
   });
+
+  const variantPlanRelativePath = 'blackbox/variant_plan.json';
+  const variantPlanPath = path.join(packageRoot, variantPlanRelativePath);
+  if (await pathExists(variantPlanPath)) {
+    const variantPlan = await readJson(variantPlanPath);
+    const plannedVariants = new Map(
+      (variantPlan?.variants ?? [])
+        .filter(variant => typeof variant?.variantId === 'string' && variant.variantId.length > 0)
+        .map(variant => [variant.variantId, variant])
+    );
+
+    for (const variantId of manifest.variantIds) {
+      const variantPath = path.join(packageRoot, 'variants', variantId, 'variant.json');
+      if (!await pathExists(variantPath)) {
+        continue;
+      }
+      const variant = await readJson(variantPath);
+      const plannedVariant = plannedVariants.get(variantId);
+      if (!plannedVariant) {
+        continue;
+      }
+      const plannedAllowedAnimations = sanitizeStringArray(plannedVariant.allowedAnimations);
+      const plannedRequiredComponents = sanitizeStringArray(plannedVariant.requiredComponents);
+
+      const mergedSource = isPlainObject(variant.source) ? { ...variant.source } : {};
+      mergedSource.blackboxVariantPlan = variantPlanRelativePath;
+
+      await writeJson(
+        variantPath,
+        {
+          ...variant,
+          label: typeof plannedVariant.label === 'string' && plannedVariant.label.length > 0
+            ? plannedVariant.label
+            : variant.label,
+          skin: typeof plannedVariant.skin === 'string' && plannedVariant.skin.length > 0
+            ? plannedVariant.skin
+            : variant.skin,
+          enabled: typeof plannedVariant.enabled === 'boolean'
+            ? plannedVariant.enabled
+            : variant.enabled,
+          allowedAnimations: plannedAllowedAnimations ?? variant.allowedAnimations,
+          requiredComponents: plannedRequiredComponents ?? variant.requiredComponents,
+          anchorProfileOverride: Object.hasOwn(plannedVariant, 'anchorProfileOverride')
+            ? plannedVariant.anchorProfileOverride
+            : variant.anchorProfileOverride ?? null,
+          scaleProfileOverride: Object.hasOwn(plannedVariant, 'scaleProfileOverride')
+            ? plannedVariant.scaleProfileOverride
+            : variant.scaleProfileOverride ?? null,
+          resourceOverrides: isPlainObject(plannedVariant.resourceOverrides)
+            ? plannedVariant.resourceOverrides
+            : variant.resourceOverrides ?? {},
+          ...(typeof plannedVariant.notes === 'string'
+            ? { notes: plannedVariant.notes }
+            : {}),
+          source: mergedSource
+        }
+      );
+    }
+  }
 
   const componentsRoot = path.join(packageRoot, manifest.componentsDir);
   const entries = await fs.readdir(componentsRoot, { withFileTypes: true });

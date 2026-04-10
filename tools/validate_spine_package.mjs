@@ -37,6 +37,12 @@ function assertOptionalArray(value, label) {
   }
 }
 
+function assertOptionalObject(value, label) {
+  if (value !== undefined && (!value || typeof value !== 'object' || Array.isArray(value))) {
+    throw new Error(`${label} 必须是 object`);
+  }
+}
+
 async function assertPathExists(filePath, label) {
   try {
     await fs.access(filePath);
@@ -147,6 +153,16 @@ function validateVariantShape(variant, manifest, variantId) {
   assertRequiredBoolean(variant.enabled, `variant.${variantId}.enabled`);
   assertRequiredArray(variant.allowedAnimations, `variant.${variantId}.allowedAnimations`);
   assertRequiredArray(variant.requiredComponents, `variant.${variantId}.requiredComponents`);
+  assertOptionalString(variant.notes, `variant.${variantId}.notes`);
+  assertOptionalObject(variant.resourceOverrides, `variant.${variantId}.resourceOverrides`);
+  assertOptionalObject(variant.source, `variant.${variantId}.source`);
+
+  if (variant.source !== undefined) {
+    assertOptionalString(
+      variant.source.blackboxVariantPlan,
+      `variant.${variantId}.source.blackboxVariantPlan`
+    );
+  }
 }
 
 function validateComponentDescriptorShape(

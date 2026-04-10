@@ -31,6 +31,9 @@
       "type": "array",
       "items": { "type": "string" }
     },
+    "notes": {
+      "type": "string"
+    },
     "anchorProfileOverride": {
       "type": ["object", "null"]
     },
@@ -39,6 +42,14 @@
     },
     "resourceOverrides": {
       "type": "object"
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "blackboxVariantPlan": {
+          "type": "string"
+        }
+      }
     }
   }
 }

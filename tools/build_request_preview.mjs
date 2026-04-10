@@ -25,11 +25,20 @@ function renderVariantPills(manifest) {
     .map(variant => {
       const tone = variant.variantId === manifest.defaultVariantId ? 'pill pill-default' : 'pill';
       const pillLabel = variant.variantId === manifest.defaultVariantId
-        ? `${variant.skin} · 默认`
-        : variant.skin;
+        ? `${variant.label} · ${variant.skin} · 默认`
+        : `${variant.label} · ${variant.skin}`;
+      const requiredComponents = Array.isArray(variant.requiredComponents) &&
+        variant.requiredComponents.length > 0
+        ? variant.requiredComponents.join(', ')
+        : '未声明';
+      const notes = typeof variant.notes === 'string' && variant.notes.length > 0
+        ? `<p>${escapeHtml(variant.notes)}</p>`
+        : '';
       return `<li class="${tone}">
         <strong>${escapeHtml(variant.variantId)}</strong>
         <span>${escapeHtml(pillLabel)}</span>
+        <em>组件: ${escapeHtml(requiredComponents)}</em>
+        ${notes}
       </li>`;
     })
     .join('\n');
@@ -299,6 +308,20 @@ export async function buildRequestPreview({
         margin-top: 4px;
         color: var(--muted);
         font-size: 13px;
+      }
+      .pill em {
+        display: block;
+        margin-top: 8px;
+        color: var(--accent);
+        font-style: normal;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .pill p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
       }
       @media (max-width: 820px) {
         .hero {

@@ -144,7 +144,12 @@ async function writePackageFixture(rootDir) {
     skin: 'default',
     enabled: true,
     allowedAnimations: ['idle', 'attack'],
-    requiredComponents: ['slot_weapon', 'slot_head']
+    requiredComponents: ['slot_weapon', 'slot_head'],
+    notes: 'Base combat loadout',
+    resourceOverrides: {},
+    source: {
+      blackboxVariantPlan: 'blackbox/variant_plan.json'
+    }
   });
   await writeJson(path.join(packageRoot, 'variants', 'winter', 'variant.json'), {
     schemaVersion: 'spine_variant_manifest_v1',
@@ -154,7 +159,14 @@ async function writePackageFixture(rootDir) {
     skin: 'winter',
     enabled: true,
     allowedAnimations: ['idle', 'attack'],
-    requiredComponents: ['slot_weapon', 'slot_head']
+    requiredComponents: ['slot_weapon'],
+    notes: 'Adds cloak silhouette and keeps only the sword component active',
+    resourceOverrides: {
+      palette: 'winter'
+    },
+    source: {
+      blackboxVariantPlan: 'blackbox/variant_plan.json'
+    }
   });
   await writeJson(path.join(packageRoot, 'source', 'request_snapshot.json'), {
     characterRequestId: 'req_hero_knight_v001',
@@ -556,6 +568,18 @@ test('buildRequestBundle 从 packages 根目录生成正式 export bundle', asyn
     result.characters[0].manifest.variants[1].allowedAnimations.includes('attack'),
     true
   );
+  assert.deepEqual(
+    result.characters[0].manifest.variants[1].requiredComponents,
+    ['slot_weapon']
+  );
+  assert.equal(
+    result.characters[0].manifest.variants[1].notes,
+    'Adds cloak silhouette and keeps only the sword component active'
+  );
+  assert.deepEqual(
+    result.characters[0].manifest.variants[1].resourceOverrides,
+    { palette: 'winter' }
+  );
 
   const manifestPath = path.join(
     outputRoot,
@@ -566,6 +590,11 @@ test('buildRequestBundle 从 packages 根目录生成正式 export bundle', asyn
   const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
   assert.equal(manifest.presentationId, 'hero_knight');
   assert.equal(manifest.atlasFile, 'hero_knight.atlas');
+  assert.deepEqual(manifest.variants[1].requiredComponents, ['slot_weapon']);
+  assert.equal(
+    manifest.variants[1].notes,
+    'Adds cloak silhouette and keeps only the sword component active'
+  );
 });
 
 test('buildRequestBundle 会清理已从 packages 中移除的旧角色目录', async () => {
@@ -683,8 +712,18 @@ test('buildRequestPreview 生成 request-driven 预览页与报告', async () =>
   assert.match(preview.html, /变体数/);
   assert.match(preview.html, /校验通过/);
   assert.match(preview.html, /winter/);
+  assert.match(preview.html, /slot_weapon/);
+  assert.match(preview.html, /Adds cloak silhouette and keeps only the sword component active/);
   assert.equal(preview.report.characters.length, 1);
   assert.equal(preview.report.characters[0].manifest.defaultVariantId, 'default');
+  assert.deepEqual(
+    preview.report.characters[0].manifest.variants[1].requiredComponents,
+    ['slot_weapon']
+  );
+  assert.equal(
+    preview.report.characters[0].manifest.variants[1].notes,
+    'Adds cloak silhouette and keeps only the sword component active'
+  );
   assert.equal(
     await fs
       .access(path.join(previewRoot, 'index.html'))

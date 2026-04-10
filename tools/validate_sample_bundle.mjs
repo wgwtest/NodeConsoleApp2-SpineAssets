@@ -77,6 +77,18 @@ function validateCharacterManifestShape(manifest) {
       variant.allowedAnimations,
       `character_manifest.variants[${index}].allowedAnimations`
     );
+    if (variant.requiredComponents !== undefined) {
+      assertRequiredArray(
+        variant.requiredComponents,
+        `character_manifest.variants[${index}].requiredComponents`
+      );
+    }
+    if (variant.notes !== undefined && variant.notes !== null) {
+      assertRequiredString(
+        variant.notes,
+        `character_manifest.variants[${index}].notes`
+      );
+    }
     if (variant.variantId === manifest.defaultVariantId) {
       hasDefaultVariant = true;
     }

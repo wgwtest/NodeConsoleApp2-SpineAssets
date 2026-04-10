@@ -123,9 +123,11 @@ export async function buildRequestBundle({
           skin: variant.skin,
           enabled: variant.enabled,
           allowedAnimations: [...variant.allowedAnimations],
+          requiredComponents: [...variant.requiredComponents],
           anchorProfileOverride: variant.anchorProfileOverride ?? null,
           scaleProfileOverride: variant.scaleProfileOverride ?? null,
-          resourceOverrides: variant.resourceOverrides ?? {}
+          resourceOverrides: variant.resourceOverrides ?? {},
+          notes: typeof variant.notes === 'string' ? variant.notes : null
         };
       });
 

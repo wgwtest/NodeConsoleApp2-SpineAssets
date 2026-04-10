@@ -159,6 +159,7 @@ npm run blackbox:run -- cloud_stub openai_cloud_stub
 6. 若已配置 `OPENAI_API_KEY`，则会优先尝试调用 OpenAI Responses API 获取真实规划 JSON；请求失败时 job 会明确标记为 `failed`
 7. 默认不会调用图像生成接口；只有在显式设置 `NANO_BANANA_ENABLED=true` 后，才会按 slot 调用 NanoBanana 生成 `render.png`
 8. 图像生成接口较贵，建议仅在你明确要产出真实组件图时开启；日常验证继续使用默认离线回退路径
+9. `blackbox:collect` 会把 `artifacts/variant_plan.json` 合并进 `workspace/packages/<presentationId>/variants/*/variant.json`，使黑盒规划真正成为 package 装配事实
 
 当前 blackbox 基线产物：
 
@@ -199,8 +200,9 @@ npm run packages:preview
 2. `packages:build` 只生成 package 骨架与 `source/` 快照，不再直接把组件收口为 `ready`
 3. `packages:validate` 默认执行严格校验，只接受已经过 `blackbox:collect` 收口、且组件 `readiness=ready` 的 package
 4. `packages:preview` 会把 `workspace/packages/` 下的 package 中间态写成可浏览的 HTML 页面和结构化报告；即使仍在 `pending_blackbox` 阶段也可预览
-5. 这三个命令会遍历 `workspace/requests/` 或 `workspace/packages/` 下的子目录
-4. 单目录调试时，也可以直接运行：
+5. 经过 `blackbox:collect` 后，package 内的 `variant.json` 会带上黑盒收口后的 `requiredComponents / notes / source.blackboxVariantPlan`
+6. 这三个命令会遍历 `workspace/requests/` 或 `workspace/packages/` 下的子目录
+7. 单目录调试时，也可以直接运行：
 
 ```bash
 node tools/build_request_package.mjs workspace/requests/<characterRequestId> workspace/packages
@@ -248,7 +250,9 @@ npm run exports:preview
 
 1. 当前 baseline 会把 `workspace/packages/` 下的所有 package 组装进同一个 `request_driven_bundle`
 2. `exports:build` 会校验每个 `variant.requiredComponents` 对应组件是否 `readiness=ready`，并要求 `reviewStatus` 位于允许导出集合
-3. 单目录调试时，也可以直接运行：
+3. 导出的 `character_manifest.json` 会直接带出每个 variant 的 `requiredComponents / notes / resourceOverrides`
+4. `exports:preview` 会把变体备注与组件需求一起展示出来，便于人工核对同一 `presentationId` 下多个 skin/variant 的装配差异
+5. 单目录调试时，也可以直接运行：
 
 ```bash
 node tools/build_request_bundle.mjs workspace/packages/<presentationId> workspace/exports/<bundleId> <bundleId>

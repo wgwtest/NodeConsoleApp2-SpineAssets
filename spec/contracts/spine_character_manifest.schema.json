@@ -80,6 +80,10 @@
           "type": "array",
           "items": { "type": "string" }
         },
+        "requiredComponents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "anchorProfileOverride": {
           "type": ["object", "null"]
         },
@@ -88,6 +92,9 @@
         },
         "resourceOverrides": {
           "type": "object"
+        },
+        "notes": {
+          "type": ["string", "null"]
         }
       }
     }

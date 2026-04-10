@@ -12,7 +12,11 @@
   "requiredComponents": [
     "weapon_sword"
   ],
+  "notes": "Winter variant keeps the sword silhouette and adds cloak ornament.",
   "anchorProfileOverride": null,
   "scaleProfileOverride": null,
-  "resourceOverrides": {}
+  "resourceOverrides": {},
+  "source": {
+    "blackboxVariantPlan": "blackbox/variant_plan.json"
+  }
 }

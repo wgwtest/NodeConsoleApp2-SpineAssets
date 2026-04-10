@@ -671,6 +671,143 @@ test('runBlackboxJobs 仅在显式开启 nanobanana 时才调用生图接口', a
   );
 });
 
+test('collectBlackboxResults 会把 variant_plan 收口到 package variant manifest', async () => {
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'blackbox-job-collect-variants-'));
+  await writeVisualRequestFixture(tmpRoot);
+  const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
+  const jobsRoot = path.join(tmpRoot, 'workspace', 'blackbox_jobs');
+  const packagesRoot = path.join(tmpRoot, 'workspace', 'packages');
+
+  await buildBlackboxJobs({
+    requestsRoot,
+    outputRoot: jobsRoot,
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub'
+  });
+
+  await withFakeOpenAIResponsesServer(
+    {
+      id: 'resp_fake_variant_123',
+      output_text: JSON.stringify({
+        summary: 'variant plan merge check',
+        layerPlan: {
+          layers: [
+            {
+              slotName: 'body',
+              componentId: 'slot_body',
+              drawOrder: 0,
+              artifactPrompt: 'female warrior body prompt',
+              notes: 'body notes'
+            },
+            {
+              slotName: 'head',
+              componentId: 'slot_head',
+              drawOrder: 1,
+              artifactPrompt: 'female warrior head prompt',
+              notes: 'head notes'
+            },
+            {
+              slotName: 'weapon',
+              componentId: 'slot_weapon',
+              drawOrder: 2,
+              artifactPrompt: 'female warrior weapon prompt',
+              notes: 'weapon notes'
+            }
+          ]
+        },
+        slotMap: {
+          slots: [
+            { slotName: 'body', componentId: 'slot_body', notes: 'body slot' },
+            { slotName: 'head', componentId: 'slot_head', notes: 'head slot' },
+            { slotName: 'weapon', componentId: 'slot_weapon', notes: 'weapon slot' }
+          ]
+        },
+        variantPlan: {
+          variants: [
+            {
+              variantId: 'default',
+              label: 'Default',
+              skin: 'default',
+              requiredComponents: ['slot_body', 'slot_head'],
+              notes: 'combat default trimmed for close framing'
+            },
+            {
+              variantId: 'ceremonial',
+              label: 'Ceremonial',
+              skin: 'ceremonial',
+              requiredComponents: ['slot_body', 'slot_weapon'],
+              notes: 'ceremonial keeps weapon and costume silhouette'
+            }
+          ]
+        }
+      })
+    },
+    async ({ baseUrl }) => {
+      const envBackup = {
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
+        OPENAI_BLACKBOX_MODEL: process.env.OPENAI_BLACKBOX_MODEL,
+        NANO_BANANA_ENABLED: process.env.NANO_BANANA_ENABLED,
+        NANO_BANANA_API_KEY: process.env.NANO_BANANA_API_KEY,
+        NANO_BANANA_BASE_URL: process.env.NANO_BANANA_BASE_URL,
+        NANO_BANANA_MODEL: process.env.NANO_BANANA_MODEL
+      };
+
+      process.env.OPENAI_API_KEY = 'test-key';
+      process.env.OPENAI_BASE_URL = baseUrl;
+      process.env.OPENAI_BLACKBOX_MODEL = 'gpt-5.4-mini';
+      delete process.env.NANO_BANANA_ENABLED;
+      delete process.env.NANO_BANANA_API_KEY;
+      delete process.env.NANO_BANANA_BASE_URL;
+      delete process.env.NANO_BANANA_MODEL;
+
+      try {
+        const runResult = await runBlackboxJobs({ jobsRoot });
+        assert.equal(runResult.jobs.length, 1);
+        assert.equal(runResult.jobs[0].status, 'succeeded');
+      } finally {
+        for (const [key, value] of Object.entries(envBackup)) {
+          if (value === undefined) {
+            delete process.env[key];
+          } else {
+            process.env[key] = value;
+          }
+        }
+      }
+    }
+  );
+
+  await collectBlackboxResults({
+    requestsRoot,
+    jobsRoot,
+    packagesRoot
+  });
+
+  const defaultVariant = JSON.parse(
+    await fs.readFile(
+      path.join(packagesRoot, 'shieldmaiden_demo', 'variants', 'default', 'variant.json'),
+      'utf8'
+    )
+  );
+  const ceremonialVariant = JSON.parse(
+    await fs.readFile(
+      path.join(packagesRoot, 'shieldmaiden_demo', 'variants', 'ceremonial', 'variant.json'),
+      'utf8'
+    )
+  );
+
+  assert.deepEqual(defaultVariant.requiredComponents, ['slot_body', 'slot_head']);
+  assert.equal(defaultVariant.notes, 'combat default trimmed for close framing');
+  assert.equal(defaultVariant.source.blackboxVariantPlan, 'blackbox/variant_plan.json');
+  assert.deepEqual(ceremonialVariant.requiredComponents, ['slot_body', 'slot_weapon']);
+  assert.equal(
+    ceremonialVariant.notes,
+    'ceremonial keeps weapon and costume silhouette'
+  );
+  assert.equal(ceremonialVariant.enabled, true);
+  assert.deepEqual(ceremonialVariant.allowedAnimations, ['idle', 'attack']);
+});
+
 test('collectBlackboxResults 会把 cloud_stub 结果收口到 package 并生成黑盒预览', async () => {
   const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'blackbox-job-collect-'));
   await writeVisualRequestFixture(tmpRoot);

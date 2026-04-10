@@ -37,9 +37,15 @@
         "hit_front",
         "death"
       ],
+      "requiredComponents": [
+        "slot_body",
+        "slot_weapon",
+        "slot_head"
+      ],
       "anchorProfileOverride": null,
       "scaleProfileOverride": null,
-      "resourceOverrides": {}
+      "resourceOverrides": {},
+      "notes": "Default battle loadout."
     },
     {
       "variantId": "festival",
@@ -50,9 +56,14 @@
         "idle",
         "attack_light"
       ],
+      "requiredComponents": [
+        "slot_body",
+        "slot_weapon"
+      ],
       "anchorProfileOverride": null,
       "scaleProfileOverride": null,
-      "resourceOverrides": {}
+      "resourceOverrides": {},
+      "notes": "Festival skin keeps weapon and body layers only."
     }
   ]
 }
