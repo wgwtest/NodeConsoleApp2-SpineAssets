@@ -134,6 +134,15 @@ export OPENAI_BLACKBOX_MODEL=gpt-5.4-mini
 export OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
+NanoBanana 可选环境变量：
+
+```bash
+export NANO_BANANA_ENABLED=true
+export NANO_BANANA_API_KEY=...
+export NANO_BANANA_BASE_URL=https://nanoapi.poloai.top/v1
+export NANO_BANANA_MODEL=gemini-2.5-flash-image
+```
+
 说明：
 
 1. `blackbox:prepare` 会为每个 request 生成一个稳定 `jobId`
@@ -148,6 +157,8 @@ npm run blackbox:run -- cloud_stub openai_cloud_stub
 
 5. `cloud_stub` 在未配置 `OPENAI_API_KEY` 时会稳定回退为离线 stub，并把回退信息写进 `provider_report.json`
 6. 若已配置 `OPENAI_API_KEY`，则会优先尝试调用 OpenAI Responses API 获取真实规划 JSON；请求失败时 job 会明确标记为 `failed`
+7. 默认不会调用图像生成接口；只有在显式设置 `NANO_BANANA_ENABLED=true` 后，才会按 slot 调用 NanoBanana 生成 `render.png`
+8. 图像生成接口较贵，建议仅在你明确要产出真实组件图时开启；日常验证继续使用默认离线回退路径
 
 当前 blackbox 基线产物：
 

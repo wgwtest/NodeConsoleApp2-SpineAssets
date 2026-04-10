@@ -173,6 +173,74 @@ async function withFakeOpenAIResponsesServer(responseBody, run) {
   }
 }
 
+async function withFakeOpenAICompatibleServer({
+  responsesBody,
+  imageResponseBody = {
+    created: 1,
+    data: [
+      {
+        b64_json: VISUAL_PNG_BASE64
+      }
+    ]
+  }
+}, run) {
+  const requests = [];
+  const server = http.createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const rawBody = Buffer.concat(chunks).toString('utf8');
+    const body = rawBody.length > 0 ? JSON.parse(rawBody) : null;
+    requests.push({
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body
+    });
+
+    if (req.url === '/v1/responses') {
+      res.writeHead(200, {
+        'content-type': 'application/json',
+        'x-request-id': 'req_fake_123'
+      });
+      res.end(JSON.stringify(responsesBody));
+      return;
+    }
+
+    if (req.url === '/v1/images/generations') {
+      res.writeHead(200, {
+        'content-type': 'application/json'
+      });
+      res.end(JSON.stringify(imageResponseBody));
+      return;
+    }
+
+    res.writeHead(404, {
+      'content-type': 'application/json'
+    });
+    res.end(JSON.stringify({ error: { message: `Unknown path ${req.url}` } }));
+  });
+
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}/v1`;
+
+  try {
+    return await run({ baseUrl, requests });
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close(error => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+  }
+}
+
 test('validateBlackboxJob 接受最小 prepared job fixture', async () => {
   const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'blackbox-job-fixture-'));
   const jobRoot = await writeJobFixture(tmpRoot);
@@ -469,6 +537,136 @@ test('runBlackboxJobs 在 cloud_stub 且配置 OPENAI_API_KEY 时优先走云端
       );
       assert.equal(layerPlan.layers[2].artifactPrompt, 'cartoon round shield and spear');
       assert.equal(layerPlan.layers[2].notes, 'weapon silhouette should stay bold');
+    }
+  );
+});
+
+test('runBlackboxJobs 仅在显式开启 nanobanana 时才调用生图接口', async () => {
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'blackbox-job-run-nanobanana-'));
+  await writeVisualRequestFixture(tmpRoot);
+  const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
+  const jobsRoot = path.join(tmpRoot, 'workspace', 'blackbox_jobs');
+
+  await buildBlackboxJobs({
+    requestsRoot,
+    outputRoot: jobsRoot,
+    providerType: 'cloud_stub',
+    providerName: 'openai_cloud_stub'
+  });
+
+  await withFakeOpenAICompatibleServer(
+    {
+      responsesBody: {
+        id: 'resp_fake_456',
+        output_text: JSON.stringify({
+          summary: 'cloud planner hit',
+          layerPlan: {
+            layers: [
+              {
+                slotName: 'body',
+                componentId: 'slot_body',
+                drawOrder: 0,
+                artifactPrompt: 'body prompt',
+                notes: 'body notes'
+              },
+              {
+                slotName: 'head',
+                componentId: 'slot_head',
+                drawOrder: 1,
+                artifactPrompt: 'head prompt',
+                notes: 'head notes'
+              },
+              {
+                slotName: 'weapon',
+                componentId: 'slot_weapon',
+                drawOrder: 2,
+                artifactPrompt: 'weapon prompt',
+                notes: 'weapon notes'
+              }
+            ]
+          },
+          slotMap: {
+            slots: [
+              { slotName: 'body', componentId: 'slot_body', notes: 'body slot' },
+              { slotName: 'head', componentId: 'slot_head', notes: 'head slot' },
+              { slotName: 'weapon', componentId: 'slot_weapon', notes: 'weapon slot' }
+            ]
+          },
+          variantPlan: {
+            variants: [
+              {
+                variantId: 'default',
+                label: 'Default',
+                skin: 'default',
+                requiredComponents: ['slot_body', 'slot_head', 'slot_weapon'],
+                notes: 'default notes'
+              },
+              {
+                variantId: 'ceremonial',
+                label: 'Ceremonial',
+                skin: 'ceremonial',
+                requiredComponents: ['slot_body', 'slot_head', 'slot_weapon'],
+                notes: 'ceremonial notes'
+              }
+            ]
+          }
+        })
+      }
+    },
+    async ({ baseUrl, requests }) => {
+      const envBackup = {
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        OPENAI_BASE_URL: process.env.OPENAI_BASE_URL,
+        OPENAI_BLACKBOX_MODEL: process.env.OPENAI_BLACKBOX_MODEL,
+        NANO_BANANA_ENABLED: process.env.NANO_BANANA_ENABLED,
+        NANO_BANANA_API_KEY: process.env.NANO_BANANA_API_KEY,
+        NANO_BANANA_BASE_URL: process.env.NANO_BANANA_BASE_URL,
+        NANO_BANANA_MODEL: process.env.NANO_BANANA_MODEL
+      };
+
+      process.env.OPENAI_API_KEY = 'test-openai-key';
+      process.env.OPENAI_BASE_URL = baseUrl;
+      process.env.OPENAI_BLACKBOX_MODEL = 'gpt-5.4-mini';
+      process.env.NANO_BANANA_ENABLED = 'true';
+      process.env.NANO_BANANA_API_KEY = 'test-nano-key';
+      process.env.NANO_BANANA_BASE_URL = baseUrl;
+      process.env.NANO_BANANA_MODEL = 'gemini-2.5-flash-image';
+
+      try {
+        const result = await runBlackboxJobs({ jobsRoot });
+        assert.equal(result.jobs.length, 1);
+        assert.equal(result.jobs[0].status, 'succeeded');
+      } finally {
+        for (const [key, value] of Object.entries(envBackup)) {
+          if (value === undefined) {
+            delete process.env[key];
+          } else {
+            process.env[key] = value;
+          }
+        }
+      }
+
+      const responseRequests = requests.filter(item => item.url === '/v1/responses');
+      const imageRequests = requests.filter(item => item.url === '/v1/images/generations');
+      assert.equal(responseRequests.length, 1);
+      assert.equal(imageRequests.length, 3);
+      assert.equal(imageRequests[0].body.model, 'gemini-2.5-flash-image');
+      assert.equal(imageRequests[0].body.response_format, 'b64_json');
+      assert.match(imageRequests[0].body.prompt, /body prompt|head prompt|weapon prompt/);
+
+      const jobRoot = path.join(jobsRoot, 'shieldmaiden_demo__req_shieldmaiden_demo_v001');
+      const providerReport = JSON.parse(
+        await fs.readFile(path.join(jobRoot, 'evidence', 'provider_report.json'), 'utf8')
+      );
+      assert.equal(providerReport.imageGeneration.used, true);
+      assert.equal(providerReport.imageGeneration.providerName, 'nanobanana');
+      assert.equal(providerReport.imageGeneration.model, 'gemini-2.5-flash-image');
+      assert.equal(providerReport.imageGeneration.callCount, 3);
+
+      const renderPng = await fs.readFile(
+        path.join(jobRoot, 'artifacts', 'components', 'weapon', 'render.png')
+      );
+      assert.deepEqual(renderPng, Buffer.from(VISUAL_PNG_BASE64, 'base64'));
     }
   );
 });

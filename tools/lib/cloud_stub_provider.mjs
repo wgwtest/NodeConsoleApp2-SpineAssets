@@ -17,6 +17,8 @@ import {
 
 const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1';
 const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini';
+const DEFAULT_NANO_BANANA_MODEL = 'gemini-2.5-flash-image';
+const DEFAULT_NANO_BANANA_SIZE = '1024x1024';
 
 function getOpenAIBaseUrl() {
   return (process.env.OPENAI_BASE_URL ?? DEFAULT_OPENAI_BASE_URL).replace(/\/+$/, '');
@@ -24,6 +26,26 @@ function getOpenAIBaseUrl() {
 
 function getOpenAIModel() {
   return process.env.OPENAI_BLACKBOX_MODEL ?? DEFAULT_OPENAI_MODEL;
+}
+
+function isTruthyEnv(value) {
+  return ['1', 'true', 'yes', 'on'].includes(String(value ?? '').toLowerCase());
+}
+
+function isNanoBananaEnabled() {
+  return isTruthyEnv(process.env.NANO_BANANA_ENABLED);
+}
+
+function getNanoBananaBaseUrl() {
+  return (process.env.NANO_BANANA_BASE_URL ?? '').replace(/\/+$/, '');
+}
+
+function getNanoBananaModel() {
+  return process.env.NANO_BANANA_MODEL ?? DEFAULT_NANO_BANANA_MODEL;
+}
+
+function getNanoBananaSize() {
+  return process.env.NANO_BANANA_SIZE ?? DEFAULT_NANO_BANANA_SIZE;
 }
 
 function detectMimeType(filePath) {
@@ -244,6 +266,60 @@ async function requestCloudPlanning({ jobRoot, job, request, sourceArtFile }) {
   };
 }
 
+function buildNanoBananaPrompt({ request, layer }) {
+  return [
+    `${request.title}`,
+    request.description,
+    `Generate a standalone character component for slot ${layer.slotName}.`,
+    `Component intent: ${layer.artifactPrompt}.`,
+    `Art direction notes: ${layer.notes}.`,
+    'Cartoon game asset, clean silhouette, transparent background, centered composition, readable edges.'
+  ].join(' ');
+}
+
+async function requestNanoBananaImage({ prompt }) {
+  const apiKey = process.env.NANO_BANANA_API_KEY;
+  const baseUrl = getNanoBananaBaseUrl();
+  if (!apiKey) {
+    throw new Error('NANO_BANANA_ENABLED 已开启，但缺少 NANO_BANANA_API_KEY');
+  }
+  if (!baseUrl) {
+    throw new Error('NANO_BANANA_ENABLED 已开启，但缺少 NANO_BANANA_BASE_URL');
+  }
+
+  const response = await fetch(`${baseUrl}/images/generations`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: getNanoBananaModel(),
+      prompt,
+      size: getNanoBananaSize(),
+      response_format: 'b64_json'
+    })
+  });
+
+  const responseJson = await response.json().catch(async () => ({
+    rawText: await response.text()
+  }));
+
+  if (!response.ok) {
+    const detail = typeof responseJson?.error?.message === 'string'
+      ? responseJson.error.message
+      : JSON.stringify(responseJson);
+    throw new Error(`NanoBanana 请求失败 status=${response.status} detail=${detail}`);
+  }
+
+  const b64Json = responseJson?.data?.[0]?.b64_json;
+  if (typeof b64Json !== 'string' || b64Json.length === 0) {
+    throw new Error('NanoBanana 未返回 data[0].b64_json');
+  }
+
+  return Buffer.from(b64Json, 'base64');
+}
+
 function buildLayerPlan({ job, sourceArtFile, planning }) {
   const cloudLayerMap = new Map(
     (planning?.layerPlan?.layers ?? []).map(layer => [layer.slotName, layer])
@@ -342,7 +418,16 @@ function buildProviderReport({
   responseId = null,
   processingMs = null,
   usage = null,
-  errorMessage = null
+  errorMessage = null,
+  imageGeneration = {
+    enabled: false,
+    used: false,
+    providerName: null,
+    model: null,
+    size: null,
+    endpointPath: null,
+    callCount: 0
+  }
 }) {
   const startMs = Date.parse(startedAt);
   const endMs = Date.parse(completedAt);
@@ -366,11 +451,15 @@ function buildProviderReport({
     responseId,
     processingMs,
     usage,
+    imageGeneration,
     notes: [
       '第一阶段 cloud_stub 仅产出计划文件、证据与可预览组件图，不直接生成生产级 Spine 数据。',
       apiKeyConfigured
         ? '检测到 OPENAI_API_KEY，优先尝试真实云端规划；失败时返回明确错误而不是静默伪成功。'
-        : '未检测到 OPENAI_API_KEY，使用离线 stub 产物保证链路可验收。'
+        : '未检测到 OPENAI_API_KEY，使用离线 stub 产物保证链路可验收。',
+      isNanoBananaEnabled()
+        ? '已显式开启 NanoBanana 组件生图，将按 slot 调用图像接口生成 render.png。'
+        : '未显式开启 NanoBanana，组件图继续使用离线占位/原图拷贝路径。'
     ],
     errorMessage
   };
@@ -391,6 +480,15 @@ export async function runCloudStubProvider({ jobRoot, job }) {
     processingMs: null,
     usage: null,
     errorMessage: null
+  };
+  let imageGenerationMeta = {
+    enabled: isNanoBananaEnabled(),
+    used: false,
+    providerName: null,
+    model: null,
+    size: null,
+    endpointPath: null,
+    callCount: 0
   };
 
   try {
@@ -448,30 +546,93 @@ export async function runCloudStubProvider({ jobRoot, job }) {
     };
   }
 
-  for (const artifactEntry of Object.values(componentArtifacts)) {
-    const artifactFile = resolveArtifactFile(artifactEntry);
-    const targetPath = path.join(jobRoot, artifactFile);
-    if (sourceArtFile) {
-      await copyFileEnsured(
-        path.join(jobRoot, sourceArtFile),
-        targetPath
-      );
+  const layerPlan = buildLayerPlan({ job, sourceArtFile, planning });
+  const slotMap = buildSlotMap({ job, sourceArtFile, planning });
+  const variantPlan = buildVariantPlan({ job, request, planning });
+
+  try {
+    if (isNanoBananaEnabled()) {
+      for (const layer of layerPlan.layers) {
+        const artifactEntry = componentArtifacts[layer.slotName];
+        const artifactFile = resolveArtifactFile(artifactEntry);
+        const targetPath = path.join(jobRoot, artifactFile);
+        const generatedBuffer = await requestNanoBananaImage({
+          prompt: buildNanoBananaPrompt({ request, layer })
+        });
+        await fs.mkdir(path.dirname(targetPath), { recursive: true });
+        await fs.writeFile(targetPath, generatedBuffer);
+      }
+      imageGenerationMeta = {
+        enabled: true,
+        used: true,
+        providerName: 'nanobanana',
+        model: getNanoBananaModel(),
+        size: getNanoBananaSize(),
+        endpointPath: '/v1/images/generations',
+        callCount: layerPlan.layers.length
+      };
     } else {
-      await writeTinyPng(targetPath);
+      for (const artifactEntry of Object.values(componentArtifacts)) {
+        const artifactFile = resolveArtifactFile(artifactEntry);
+        const targetPath = path.join(jobRoot, artifactFile);
+        if (sourceArtFile) {
+          await copyFileEnsured(
+            path.join(jobRoot, sourceArtFile),
+            targetPath
+          );
+        } else {
+          await writeTinyPng(targetPath);
+        }
+      }
     }
+  } catch (error) {
+    const completedAt = new Date().toISOString();
+    await writeJson(
+      path.join(jobRoot, BLACKBOX_PROVIDER_REPORT_FILE),
+      buildProviderReport({
+        job,
+        sourceArtFile,
+        startedAt,
+        completedAt,
+        ...providerMeta,
+        errorMessage: error.message,
+        imageGeneration: {
+          ...imageGenerationMeta,
+          enabled: isNanoBananaEnabled()
+        }
+      })
+    );
+
+    return {
+      ...job,
+      status: 'failed',
+      updatedAt: completedAt,
+      outputs: {
+        layerPlanFile: null,
+        slotMapFile: null,
+        variantPlanFile: null,
+        componentArtifacts: {}
+      },
+      errors: [
+        {
+          code: 'component_image_generation_failed',
+          message: error.message
+        }
+      ]
+    };
   }
 
   await writeJson(
     path.join(jobRoot, BLACKBOX_LAYER_PLAN_FILE),
-    buildLayerPlan({ job, sourceArtFile, planning })
+    layerPlan
   );
   await writeJson(
     path.join(jobRoot, BLACKBOX_SLOT_MAP_FILE),
-    buildSlotMap({ job, sourceArtFile, planning })
+    slotMap
   );
   await writeJson(
     path.join(jobRoot, BLACKBOX_VARIANT_PLAN_FILE),
-    buildVariantPlan({ job, request, planning })
+    variantPlan
   );
 
   const completedAt = new Date().toISOString();
@@ -482,7 +643,8 @@ export async function runCloudStubProvider({ jobRoot, job }) {
       sourceArtFile,
       startedAt,
       completedAt,
-      ...providerMeta
+      ...providerMeta,
+      imageGeneration: imageGenerationMeta
     })
   );
 
