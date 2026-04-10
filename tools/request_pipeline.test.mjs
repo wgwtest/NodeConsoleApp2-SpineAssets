@@ -94,6 +94,31 @@ async function writeVisualRequestFixture(rootDir) {
   return requestRoot;
 }
 
+async function writeJpegVisualRequestFixture(rootDir) {
+  const requestRoot = path.join(rootDir, 'workspace', 'requests', 'req_shieldmaiden_jpg_v001');
+  await writeJson(path.join(requestRoot, 'request.json'), {
+    schemaVersion: 'character_request_v1',
+    characterRequestId: 'req_shieldmaiden_jpg_v001',
+    presentationId: 'shieldmaiden_jpg_demo',
+    title: 'Shieldmaiden JPG Demo',
+    description: 'Cartoon female warrior demo request with a visible JPG source.',
+    bundleTarget: 'main_cast',
+    variants: [
+      {
+        variantId: 'default',
+        label: 'Default',
+        skin: 'default'
+      }
+    ],
+    requiredActions: ['idle'],
+    requiredSlots: ['weapon', 'head']
+  });
+  await writeFile(path.join(requestRoot, 'art', 'female_warrior.jpg'), 'jpg-fixture-bytes');
+  await writeFile(path.join(requestRoot, 'notes', 'brief.md'), 'female warrior jpg demo');
+  await writeFile(path.join(requestRoot, 'refs', 'attribution.md'), 'user supplied');
+  return requestRoot;
+}
+
 async function prepareCollectedPackages(rootDir, requestsRoot, packagesRoot) {
   const jobsRoot = path.join(rootDir, 'workspace', 'blackbox_jobs');
   await buildBlackboxJobs({
@@ -386,6 +411,31 @@ test('buildRequestPackage 当 request 含 PNG 原画时仍保持待黑盒加工�
       .catch(() => false),
     false
   );
+});
+
+test('buildRequestPackage 当 request 仅含 JPG 原画时会沿用 JPG 作为主纹理来源', async () => {
+  const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'jpeg-request-package-build-'));
+  const requestRoot = await writeJpegVisualRequestFixture(tmpRoot);
+  const requestsRoot = path.join(tmpRoot, 'workspace', 'requests');
+  const packagesRoot = path.join(tmpRoot, 'workspace', 'packages');
+
+  await buildRequestPackage({
+    requestsRoot,
+    outputRoot: packagesRoot
+  });
+
+  const packageRoot = path.join(packagesRoot, 'shieldmaiden_jpg_demo');
+  const packageManifest = JSON.parse(
+    await fs.readFile(path.join(packageRoot, 'package_manifest.json'), 'utf8')
+  );
+  assert.deepEqual(packageManifest.texturePages, ['shieldmaiden_jpg_demo.jpg']);
+
+  const sourceJpg = await fs.readFile(path.join(requestRoot, 'art', 'female_warrior.jpg'));
+  const textureJpg = await fs.readFile(
+    path.join(packageRoot, 'spine', 'shieldmaiden_jpg_demo.jpg')
+  );
+
+  assert.deepEqual(textureJpg, sourceJpg);
 });
 
 test('buildRequestPackage 会清理已从 requests 中移除的旧 package', async () => {

@@ -8,6 +8,7 @@ import {
 
 const TINY_PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aK1sAAAAASUVORK5CYII=';
+const SUPPORTED_RASTER_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
 
 async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, 'utf8'));
@@ -100,7 +101,7 @@ repeat: none
 `;
 }
 
-function buildPackageManifest(request) {
+function buildPackageManifest(request, textureExtension = '.png') {
   return {
     schemaVersion: 'spine_package_manifest_v1',
     presentationId: request.presentationId,
@@ -115,7 +116,7 @@ function buildPackageManifest(request) {
     spineDir: 'spine',
     skeletonFile: `${request.presentationId}.json`,
     atlasFile: `${request.presentationId}.atlas`,
-    texturePages: [`${request.presentationId}.png`],
+    texturePages: [`${request.presentationId}${textureExtension}`],
     anchorProfile: {
       x: 0.5,
       y: 1
@@ -166,8 +167,10 @@ function buildComponentDescriptor({
   };
 }
 
-function findPrimaryPngSource(artFiles) {
-  return artFiles.find(filePath => path.extname(filePath).toLowerCase() === '.png') ?? null;
+function findPrimaryRasterSource(artFiles) {
+  return artFiles.find(filePath => (
+    SUPPORTED_RASTER_EXTENSIONS.has(path.extname(filePath).toLowerCase())
+  )) ?? null;
 }
 
 async function copyRequestSources(requestRoot, packageRoot) {
@@ -210,13 +213,18 @@ export async function buildRequestPackage({
 
   for (const report of reports) {
     const request = await readJson(path.join(report.requestRoot, 'request.json'));
-    const packageManifest = buildPackageManifest(request);
     const packageRoot = path.join(resolvedOutputRoot, request.presentationId);
-    const spineRoot = path.join(packageRoot, packageManifest.spineDir);
 
     await fs.rm(packageRoot, { recursive: true, force: true });
-    await writeJson(path.join(packageRoot, 'package_manifest.json'), packageManifest);
     const copiedSources = await copyRequestSources(report.requestRoot, packageRoot);
+    const primaryRasterSource = findPrimaryRasterSource(copiedSources.artFiles);
+    const textureExtension = primaryRasterSource
+      ? path.extname(primaryRasterSource).toLowerCase()
+      : '.png';
+    const packageManifest = buildPackageManifest(request, textureExtension);
+    const spineRoot = path.join(packageRoot, packageManifest.spineDir);
+
+    await writeJson(path.join(packageRoot, 'package_manifest.json'), packageManifest);
     await writeJson(
       path.join(packageRoot, packageManifest.requestSnapshotFile),
       {
@@ -264,10 +272,9 @@ export async function buildRequestPackage({
       buildAtlasText(packageManifest.texturePages[0])
     );
 
-    const primaryPngSource = findPrimaryPngSource(copiedSources.artFiles);
-    if (primaryPngSource) {
+    if (primaryRasterSource) {
       await copyFileEnsured(
-        path.join(packageRoot, packageManifest.sourceRequestDir, primaryPngSource),
+        path.join(packageRoot, packageManifest.sourceRequestDir, primaryRasterSource),
         path.join(spineRoot, packageManifest.texturePages[0])
       );
     } else {

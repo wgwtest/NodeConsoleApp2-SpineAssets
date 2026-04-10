@@ -3,7 +3,7 @@
   "characterRequestId": "req_shieldmaiden_demo_v001",
   "presentationId": "shieldmaiden_demo",
   "title": "Shieldmaiden Demo",
-  "description": "Cartoon female warrior sample sourced from a real web PNG for visible request-driven preview output.",
+  "description": "Cartoon female warrior sample using the user-provided shieldmaiden JPG as the request-side reference art.",
   "bundleTarget": "main_cast",
   "variants": [
     {

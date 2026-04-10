@@ -1,5 +1,5 @@
 # Shieldmaiden Demo Brief
 
-- Purpose: replace the non-visual placeholder sample with a request that produces an immediately readable preview.
-- Visual target: cartoon female warrior, full-body illustration, transparent PNG.
-- Pipeline intent: the current build treats this source PNG as a blackbox-produced visual so package/export previews remain human-readable before real Spine assets exist.
+- Purpose: use the user-selected shieldmaiden illustration as the request-side sample so the preview matches the intended visual style.
+- Visual target: black-haired cartoon shieldmaiden with axe and tower shield, full-body standing pose.
+- Pipeline intent: the current build treats this source JPG as the visible request reference so package/export previews remain human-readable before real Spine assets exist.

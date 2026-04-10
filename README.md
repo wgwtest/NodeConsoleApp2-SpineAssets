@@ -201,8 +201,9 @@ npm run packages:preview
 3. `packages:validate` 默认执行严格校验，只接受已经过 `blackbox:collect` 收口、且组件 `readiness=ready` 的 package
 4. `packages:preview` 会把 `workspace/packages/` 下的 package 中间态写成可浏览的 HTML 页面和结构化报告；即使仍在 `pending_blackbox` 阶段也可预览
 5. 经过 `blackbox:collect` 后，package 内的 `variant.json` 会带上黑盒收口后的 `requiredComponents / notes / source.blackboxVariantPlan`
-6. 这三个命令会遍历 `workspace/requests/` 或 `workspace/packages/` 下的子目录
-7. 单目录调试时，也可以直接运行：
+6. request 原画主纹理支持 `png / jpg / jpeg / webp`；若存在可识别的位图源文件，会直接沿用其扩展名作为 package 的首张 texture page
+7. 这三个命令会遍历 `workspace/requests/` 或 `workspace/packages/` 下的子目录
+8. 单目录调试时，也可以直接运行：
 
 ```bash
 node tools/build_request_package.mjs workspace/requests/<characterRequestId> workspace/packages
