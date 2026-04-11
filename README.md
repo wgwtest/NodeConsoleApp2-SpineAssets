@@ -15,28 +15,32 @@
 
 当前仓库已完成：
 
-1. 独立 git 仓库初始化
-2. `CODEX_DOC` 文档根建立
-3. 输入输出契约初稿建立
-4. 最小同步脚手架 `tools/sync_game_catalog.mjs`
-5. `B1` 官方样本 bundle 验证链路
-6. 首轮自测、验收清单和会话交接文档建立
+1. `1` 工程底座与输入输出约定的最小基线
+2. `2` 样本回归验证链路
+3. `3.1` 输入接收的最小可用基线
+4. `3.5` 交付包导出的最小可用基线
+5. 首轮自测、验收清单和会话交接文档建立
 
 当前活跃节点：
 
-1. `阶段C / C2 角色原画黑盒加工与组件化 package 完善`
+1. `3 / 3.2 任务建档`
 
 当前阶段进展：
 
-1. `C1` 已完成最小 `request -> package -> export` 主线、校验链与预览证据
-2. 当前转入 `C2`，优先补齐 blackbox 任务编排框架、过程留痕、云端 AI stub 与 variant 装配完备性
+1. `3.1` 输入接收已经完成最小 `request -> package -> export` 基线、校验链与预览证据
+2. 当前正在把 `3.2 任务建档`、`3.3 拆件加工`、`3.4 角色包收口` 和 `3.6 运行验收` 重构为一套统一的中文线性主流程
 
 当前主线说明：
 
-1. 正式生产主线已经切换为 `request -> package -> export`
-2. `B1` 官方样本链继续保留，但只作为回归验证线
-3. 主工程消费接入被后移到 `阶段D / D1`
-4. `C2` 第一阶段内部主线进一步细化为 `request -> blackbox -> package -> export`
+1. 正式生产主线按线性六步表达：
+   - `3.1 输入接收`
+   - `3.2 任务建档`
+   - `3.3 拆件加工`
+   - `3.4 角色包收口`
+   - `3.5 交付包导出`
+   - `3.6 运行验收`
+2. `2` 样本回归验证继续保留，但只作为回归验证线
+3. 主工程消费接入后移到 `4 / 4.1 主工程导入与交付规范`
 
 推荐执行顺序：
 
@@ -92,9 +96,7 @@ workspace/imports/game_catalog.json
 5. `workspace/blackbox_jobs/`
    - 黑盒任务工作目录、证据与日志
 
-## C1.1 契约校验命令
-
-## C2.3 blackbox 编排基线命令
+## 3.1 输入接收与 3.2-3.4 中间加工命令
 
 从 `workspace/requests/` 生成 blackbox job 工作目录：
 
@@ -145,7 +147,7 @@ export NANO_BANANA_MODEL=gemini-2.5-flash-image
 
 说明：
 
-1. `blackbox:prepare` 会为每个 request 生成一个稳定 `jobId`
+1. `blackbox:prepare` 对应 `3.2 任务建档`，会为每个 request 生成一个稳定 `jobId`
 2. job 会冻结 `input/request.json` 与 `input/art|notes|refs`
 3. 当前第一阶段默认 provider 是 `manual`
 4. 需要走云端 stub 时，可以直接覆盖 prepare/run 的 provider：
@@ -159,7 +161,8 @@ npm run blackbox:run -- cloud_stub openai_cloud_stub
 6. 若已配置 `OPENAI_API_KEY`，则会优先尝试调用 OpenAI Responses API 获取真实规划 JSON；请求失败时 job 会明确标记为 `failed`
 7. 默认不会调用图像生成接口；只有在显式设置 `NANO_BANANA_ENABLED=true` 后，才会按 slot 调用 NanoBanana 生成 `render.png`
 8. 图像生成接口较贵，建议仅在你明确要产出真实组件图时开启；日常验证继续使用默认离线回退路径
-9. `blackbox:collect` 会把 `artifacts/variant_plan.json` 合并进 `workspace/packages/<presentationId>/variants/*/variant.json`，使黑盒规划真正成为 package 装配事实
+9. `blackbox:run` 对应 `3.3 拆件加工`
+10. `blackbox:collect` 对应 `3.4 角色包收口`，会把 `artifacts/variant_plan.json` 合并进 `workspace/packages/<presentationId>/variants/*/variant.json`，使拆件结果真正成为 package 装配事实
 
 当前 blackbox 基线产物：
 
@@ -227,7 +230,7 @@ node tools/build_package_preview.mjs workspace/packages/<presentationId> workspa
 2. `workspace/preview/packages/report.json`
 3. `workspace/preview/packages/assets/`
 
-## C1.2 导出 baseline 命令
+## 3.5 交付包导出命令
 
 从 `workspace/packages/` 生成正式 export bundle：
 
@@ -273,6 +276,8 @@ node tools/build_request_preview.mjs workspace/exports/<bundleId> workspace/prev
 2. `workspace/preview/request_driven_bundle/report.json`
 3. `workspace/preview/request_driven_bundle/assets/`
 
+## 3.6 运行验收产物
+
 当前全过程验收预览产物：
 
 1. `workspace/preview/workflow/index.html`
@@ -281,13 +286,13 @@ node tools/build_request_preview.mjs workspace/exports/<bundleId> workspace/prev
 
 说明：
 
-1. `workflow:preview` 会把同一案例的 `request -> blackbox prepare -> blackbox run -> package collect -> export bundle -> paperdollObject` 串成一个单页
+1. `workflow:preview` 会把同一案例的 `输入接收 -> 任务建档 -> 拆件加工 -> 角色包收口 -> 交付包导出 -> 运行验收` 串成一个单页
 2. 页面会直接展开关键输入/输出文件，包括 `request.json / job.json / layer_plan.json / slot_map.json / variant_plan.json / descriptor.json / character_manifest.json`
-3. 最后一步的 `paperdollObject` 是从 package 和 export 数据派生的运行时快照，用于人工验收，不代表已经接入战斗运行时
+3. 最后一步的运行时对象是从 package 和 export 数据派生的运行时快照，用于人工验收，不代表已经接入战斗运行时
 
-## B1 官方样本回归验证
+## 2 样本回归验证
 
-执行完整 `B1` 官方样本链路：
+执行完整 `2.1 官方样本导入、Rig 与导出验证`：
 
 ```bash
 npm run samples:b1
@@ -314,9 +319,9 @@ npm run samples:b1
 3. [总体设计](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/01-独立素材工程总体设计(spine_assets_architecture)-设计说明.md)
 4. [双仓库协作规则](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/03-双仓库协作模式与接口变更规则(cross_repo_collaboration)-设计说明.md)
 5. [Request-driven Spine 素材生产链设计](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/06-角色请求目录驱动的Spine素材生产链(request_driven_spine_asset_pipeline)-设计说明.md)
-6. [B1 官方样本bundle验证链路设计](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/05-B1官方样本bundle验证链路(b1_official_sample_bundle_validation)-设计说明.md)
-7. [C1 request-driven 实施计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-08-C1-request-driven-spine-production-implementation-plan.md)
-8. [B1 自测报告](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/05_测试文档/01_自测报告/2026-04-07-202540-B1-官方样本bundle验证链路-自测报告.md)
+6. [2 样本回归验证设计](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/02_设计说明/05-B1官方样本bundle验证链路(b1_official_sample_bundle_validation)-设计说明.md)
+7. [3 正式生产主线实施计划](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/04_研发文档/2026-04-08-C1-request-driven-spine-production-implementation-plan.md)
+8. [2 样本回归验证自测报告](/home/wgw/CodexProject/NodeConsoleApp2-SpineAssets/DOC/CODEX_DOC/05_测试文档/01_自测报告/2026-04-07-202540-B1-官方样本bundle验证链路-自测报告.md)
 
 ## 目录
 

@@ -1,4 +1,4 @@
-# WBS L3：A2.2 presentation_catalog与bundle_manifest版本化契约
+# WBS L3：1.2.2 目录清单与交付清单版本化契约
 
 ## 1. 工作目标
 

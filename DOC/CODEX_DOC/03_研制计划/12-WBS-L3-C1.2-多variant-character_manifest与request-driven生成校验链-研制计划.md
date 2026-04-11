@@ -1,8 +1,8 @@
-# WBS L3：C1.2 多 variant character_manifest 与 request-driven 生成校验链
+# WBS L2：3.5 交付包导出
 
 ## 1. 目标
 
-把现有单角色 `character_manifest` 升级为支持同一 `presentationId` 下多个 `variant` 的正式结构，并建立从 package 到 export 的 request-driven 生成与校验链。
+把 package 中间态导出为主工程可消费的正式交付包，并建立从 package 到 export 的生成与校验链。
 
 ## 2. 预期输出
 
@@ -13,7 +13,7 @@
 
 ## 3. 进入条件
 
-1. `C1.1` 已明确 request 与 package 的目录和字段边界
+1. `3.4` 已明确组件收口后的 package 目录和字段边界
 
 ## 4. 关闭标准
 
